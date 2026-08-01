@@ -79,6 +79,42 @@ body {
   outline-offset: 2px;
 }
 
+/* ------------------------------------------------------------------
+   Tirilla térmica de 58 mm.
+   El ancho útil real ronda los 48 mm: no meter tablas de más de dos
+   columnas. En la impresora hay que dejar los márgenes en cero y
+   desactivar encabezado y pie del navegador, o salen impresos la URL y
+   la fecha en medio de la tirilla.
+   ------------------------------------------------------------------ */
+@page {
+  size: 58mm auto;
+  margin: 0;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #tirilla,
+  #tirilla * {
+    visibility: visible;
+  }
+
+  #tirilla {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 58mm;
+    padding: 2mm;
+    background: #fff;
+    color: #000;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.3;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
