@@ -37,7 +37,7 @@ cerradas.
 |---|---|---|
 | 1 | Proyecto Next.js y conexión a Supabase | Hecho |
 | 2 | Auth, middleware de sesión, layout de administración | Hecho |
-| 3 | CRUD de productos y variantes | Pendiente |
+| 3 | CRUD de productos y variantes | Hecho |
 | 4 | POS: caja, lector, pago, tirilla, turno | Pendiente |
 | 5 | Catálogo público, filtros y carrito | Pendiente |
 | 6 | Checkout a WhatsApp y bandeja de pedidos | Pendiente |
