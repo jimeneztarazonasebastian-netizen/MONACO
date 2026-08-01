@@ -22,8 +22,9 @@ cerradas.
 
 1. Copia `.env.example` a `.env.local`.
 2. Llena `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
-3. Aplica las migraciones de `supabase/migrations/`. **Ojo: falta la 0001**,
-   lee [`supabase/migrations/LEEME.md`](./supabase/migrations/LEEME.md).
+3. Aplica las migraciones de `supabase/migrations/` **en orden**: primero la
+   0001, después la 0002. Lee
+   [`supabase/migrations/LEEME.md`](./supabase/migrations/LEEME.md).
 4. Genera los tipos, que hoy están puestos a mano:
 
    ```bash
