@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     default: "Mónaco",
     template: "%s · Mónaco",
   },
-  description: "Ropa deportiva. Bucaramanga, Colombia.",
+  description: "Ropa deportiva. Barrancabermeja, Colombia.",
 };
 
 export default function RootLayout({

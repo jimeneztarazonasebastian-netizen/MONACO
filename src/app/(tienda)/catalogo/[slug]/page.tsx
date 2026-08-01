@@ -46,7 +46,7 @@ export async function generateMetadata({
     title: datos.producto.name,
     description:
       datos.producto.description ??
-      `${datos.producto.name} — ropa deportiva Mónaco, Bucaramanga.`,
+      `${datos.producto.name} — ropa deportiva Mónaco, Barrancabermeja.`,
     openGraph: {
       title: datos.producto.name,
       images: primeraImagen(datos.producto.images)

@@ -7,7 +7,7 @@ Ubicación: raíz del repositorio.
 
 ## 1. Qué estamos construyendo
 
-Una sola aplicación web que sirve dos frentes del mismo negocio, una tienda de ropa deportiva en Bucaramanga, Colombia:
+Una sola aplicación web que sirve dos frentes del mismo negocio, una tienda de ropa deportiva en Barrancabermeja, Colombia:
 
 - **Catálogo público (B2C)**: la gente navega prendas, arma un carrito y al confirmar se abre WhatsApp con el pedido ya redactado. No hay pasarela de pago. La venta se cierra por chat.
 - **POS en tienda**: la caja del local físico. Lector de código de barras, cobro, tirilla térmica de 58 mm, cierre de turno.

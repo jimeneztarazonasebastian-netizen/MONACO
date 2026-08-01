@@ -22,7 +22,7 @@ export default async function PaginaInicio() {
         <Monograma className="mx-auto mb-8 h-16 w-16 text-blanco" />
         <h1 className="fuente-display mb-5 text-3xl sm:text-5xl">Mónaco</h1>
         <p className="mx-auto mb-10 max-w-md leading-relaxed text-gris">
-          Ropa deportiva para entrenar en serio. Bucaramanga.
+          Ropa deportiva para entrenar en serio. Barrancabermeja.
         </p>
         <Link
           href="/catalogo"

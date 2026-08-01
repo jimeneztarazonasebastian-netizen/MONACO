@@ -42,7 +42,7 @@ export default async function LayoutTienda({
         <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-8 text-xs text-gris">
           <div>
             <p className="fuente-display mb-3 text-blanco">Mónaco</p>
-            <p>Ropa deportiva · Bucaramanga</p>
+            <p>Ropa deportiva · Barrancabermeja</p>
           </div>
 
           <div className="flex flex-col gap-1">

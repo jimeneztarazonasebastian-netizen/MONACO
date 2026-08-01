@@ -10,7 +10,7 @@ import { ordenarTallas, plural } from "@/lib/texto";
 
 export const metadata: Metadata = {
   title: "Catálogo",
-  description: "Ropa deportiva Mónaco. Bucaramanga, Colombia.",
+  description: "Ropa deportiva Mónaco. Barrancabermeja, Colombia.",
 };
 
 const ORDENES = [

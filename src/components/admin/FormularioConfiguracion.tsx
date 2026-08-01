@@ -38,7 +38,7 @@ export function FormularioConfiguracion({
         etiqueta="Dirección"
         name="address"
         defaultValue={v?.address ?? ajustes.address ?? ""}
-        placeholder="Calle 36 # 20-15, Bucaramanga"
+        placeholder="Calle 49 # 17-30, Barrancabermeja"
       />
 
       <Campo
