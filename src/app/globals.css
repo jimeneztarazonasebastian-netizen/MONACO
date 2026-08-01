@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   Sistema visual Mónaco.
+   La paleta y las tipografías salen del CLAUDE.md y no se improvisan
+   aquí: si hay que cambiar un color, se cambia en este bloque y en
+   ningún otro sitio.
+   ------------------------------------------------------------------ */
+@theme {
+  --color-negro: #0a0a0a;
+  --color-carbon: #171719;
+  --color-humo: #2a2a2e;
+  --color-blanco: #fafafa;
+  --color-gris: #8a8a90;
+  --color-rojo: #d6001c;
+
+  --font-display: var(--fuente-display), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--fuente-cuerpo), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--fuente-mono), ui-monospace, monospace;
+}
+
+/* El corte a 35° es el elemento firma: el mismo ángulo del trazo del
+   monograma. Se repite en toda la interfaz en lugar de esquinas
+   redondeadas. 20px en horizontal × 14px en vertical = tan(35°). */
+@utility bisel {
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 14px),
+    calc(100% - 20px) 100%,
+    0 100%
+  );
+}
+
+@utility bisel-sm {
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 7px),
+    calc(100% - 10px) 100%,
+    0 100%
+  );
+}
+
+/* Badge de talla: paralelogramo con la misma inclinación. El contenido
+   se contra-inclina para que el texto quede recto. */
+@utility badge-diagonal {
+  transform: skewX(-35deg);
+}
+
+@utility badge-diagonal-texto {
+  display: block;
+  transform: skewX(35deg);
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-negro);
+  color: var(--color-blanco);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* El display recoge la geometría ancha del logotipo. Archivo es
+   variable en el eje wdth; 120 es el ancho expandido que usamos. */
+.fuente-display {
+  font-family: var(--font-display);
+  font-variation-settings: "wdth" 120;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+/* Foco siempre visible, en el acento de la marca. */
+:focus-visible {
+  outline: 2px solid var(--color-rojo);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
