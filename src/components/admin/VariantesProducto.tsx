@@ -109,17 +109,18 @@ function FilaVariante({
               <input type="hidden" name="producto_id" value={productoId} />
 
               <div className="flex flex-wrap gap-4">
+                {/* Si la edición falló, se repone lo que se escribió. */}
                 <Campo
                   etiqueta="Talla"
                   name="talla"
-                  defaultValue={variante.size}
+                  defaultValue={estadoEdicion.valores?.talla ?? variante.size}
                   className="w-24"
                   required
                 />
                 <Campo
                   etiqueta="Color"
                   name="color"
-                  defaultValue={variante.color}
+                  defaultValue={estadoEdicion.valores?.color ?? variante.color}
                   className="w-36"
                   required
                 />
@@ -127,14 +128,14 @@ function FilaVariante({
                   etiqueta="Costo"
                   name="costo"
                   inputMode="numeric"
-                  defaultValue={variante.cost_price}
+                  defaultValue={estadoEdicion.valores?.costo ?? variante.cost_price}
                   className="w-32"
                 />
                 <Campo
                   etiqueta="Precio"
                   name="precio"
                   inputMode="numeric"
-                  defaultValue={variante.sale_price}
+                  defaultValue={estadoEdicion.valores?.precio ?? variante.sale_price}
                   className="w-32"
                   required
                 />
@@ -142,7 +143,9 @@ function FilaVariante({
                   etiqueta="Avisar bajo"
                   name="aviso_stock"
                   inputMode="numeric"
-                  defaultValue={variante.low_stock_threshold}
+                  defaultValue={
+                    estadoEdicion.valores?.aviso_stock ?? variante.low_stock_threshold
+                  }
                   className="w-28"
                   ayuda="Unidades"
                 />
@@ -182,7 +185,11 @@ function FilaVariante({
               </p>
 
               <div className="flex flex-wrap gap-4">
-                <Seleccion etiqueta="Motivo" name="tipo" defaultValue="entrada">
+                <Seleccion
+                  etiqueta="Motivo"
+                  name="tipo"
+                  defaultValue={estadoStock.valores?.tipo ?? "entrada"}
+                >
                   <option value="entrada">Entrada de mercancía</option>
                   <option value="ajuste">Ajuste por conteo</option>
                   <option value="merma">Merma o daño</option>
@@ -193,6 +200,7 @@ function FilaVariante({
                   name="cantidad"
                   inputMode="numeric"
                   placeholder="10 o -3"
+                  defaultValue={estadoStock.valores?.cantidad ?? ""}
                   className="w-36"
                   ayuda="Negativo para sacar"
                   required
@@ -201,6 +209,7 @@ function FilaVariante({
                   etiqueta="Nota"
                   name="nota"
                   placeholder="Llegó pedido del proveedor"
+                  defaultValue={estadoStock.valores?.nota ?? ""}
                   className="min-w-56 flex-1"
                   required
                 />

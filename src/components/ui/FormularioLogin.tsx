@@ -36,6 +36,7 @@ export function FormularioLogin({ redirigir }: { redirigir: string }) {
           type="email"
           name="correo"
           autoComplete="username"
+          defaultValue={estado.correo ?? ""}
           required
           autoFocus
           className="h-14 border border-humo bg-carbon px-4 text-base text-blanco placeholder:text-gris focus:border-gris focus:outline-none"

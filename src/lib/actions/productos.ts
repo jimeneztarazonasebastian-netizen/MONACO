@@ -19,6 +19,18 @@ type VarianteEntrada = {
   barcode: string | null;
 };
 
+/**
+ * Guarda lo que venía en el formulario para devolverlo si la acción
+ * falla. Ver el comentario de `valores` en EstadoFormulario.
+ */
+function recordar(formData: FormData, campos: string[]): Record<string, string> {
+  const valores: Record<string, string> = {};
+  for (const campo of campos) valores[campo] = aTexto(formData.get(campo));
+  return valores;
+}
+
+const CAMPOS_PRODUCTO = ["nombre", "descripcion", "categoria", "destacado"];
+
 function leerVariantes(formData: FormData): VarianteEntrada[] {
   const crudo = aTexto(formData.get("variantes"));
   if (!crudo) return [];
@@ -140,13 +152,14 @@ export async function crearProducto(
 ): Promise<EstadoFormulario> {
   await exigirAdmin();
   const supabase = await crearClienteServidor();
+  const valores = recordar(formData, CAMPOS_PRODUCTO);
 
   const nombre = aTexto(formData.get("nombre"));
-  if (!nombre) return { error: "El producto necesita un nombre." };
+  if (!nombre) return { error: "El producto necesita un nombre.", valores };
 
   const variantes = leerVariantes(formData);
   const problema = validarVariantes(variantes);
-  if (problema) return { error: problema };
+  if (problema) return { error: problema, valores };
 
   const categoriaId = aTexto(formData.get("categoria")) || null;
 
@@ -165,13 +178,13 @@ export async function crearProducto(
 
   if (error) {
     if (error.code === "23505") {
-      return { error: "Ya existe un producto con ese nombre." };
+      return { error: "Ya existe un producto con ese nombre.", valores };
     }
-    return { error: `No se pudo crear el producto: ${error.message}` };
+    return { error: `No se pudo crear el producto: ${error.message}`, valores };
   }
 
   const fallo = await insertarVariantes(supabase, producto.id, variantes);
-  if (fallo) return { error: fallo, id: producto.id };
+  if (fallo) return { error: fallo, id: producto.id, valores };
 
   revalidatePath("/productos");
   return { error: null, ok: true, id: producto.id };
@@ -184,10 +197,11 @@ export async function actualizarProducto(
   await exigirAdmin();
   const supabase = await crearClienteServidor();
 
+  const valores = recordar(formData, CAMPOS_PRODUCTO);
   const id = aTexto(formData.get("id"));
   const nombre = aTexto(formData.get("nombre"));
-  if (!id) return { error: "Falta el producto." };
-  if (!nombre) return { error: "El producto necesita un nombre." };
+  if (!id) return { error: "Falta el producto.", valores };
+  if (!nombre) return { error: "El producto necesita un nombre.", valores };
 
   const { error } = await supabase
     .from("products")
@@ -203,9 +217,9 @@ export async function actualizarProducto(
   if (error) {
     // Renombrar hacia un nombre ya usado choca contra el slug único.
     if (error.code === "23505") {
-      return { error: "Ya existe otra prenda con ese nombre." };
+      return { error: "Ya existe otra prenda con ese nombre.", valores };
     }
-    return { error: `No se pudo guardar: ${error.message}` };
+    return { error: `No se pudo guardar: ${error.message}`, valores };
   }
 
   revalidatePath("/productos");
@@ -263,15 +277,26 @@ export async function actualizarVariante(
   await exigirAdmin();
   const supabase = await crearClienteServidor();
 
+  const valores = recordar(formData, [
+    "talla",
+    "color",
+    "costo",
+    "precio",
+    "aviso_stock",
+  ]);
   const id = aTexto(formData.get("id"));
   const productoId = aTexto(formData.get("producto_id"));
-  if (!id) return { error: "Falta la variante." };
+  if (!id) return { error: "Falta la variante.", valores };
 
   const costo = aPesos(formData.get("costo"));
   const precio = aPesos(formData.get("precio"));
 
-  if (precio <= 0) return { error: "El precio de venta no puede quedar en cero." };
-  if (precio < costo) return { error: "El precio quedaría por debajo del costo." };
+  if (precio <= 0) {
+    return { error: "El precio de venta no puede quedar en cero.", valores };
+  }
+  if (precio < costo) {
+    return { error: "El precio quedaría por debajo del costo.", valores };
+  }
 
   const { error } = await supabase
     .from("product_variants")
@@ -284,7 +309,15 @@ export async function actualizarVariante(
     })
     .eq("id", id);
 
-  if (error) return { error: `No se pudo guardar: ${error.message}` };
+  if (error) {
+    if (error.code === "23505") {
+      return {
+        error: "Ya existe otra variante con esa talla y ese color.",
+        valores,
+      };
+    }
+    return { error: `No se pudo guardar: ${error.message}`, valores };
+  }
 
   revalidatePath(`/productos/${productoId}`);
   revalidatePath("/inventario");
@@ -311,15 +344,18 @@ export async function ajustarStock(
   await exigirAdmin();
   const supabase = await crearClienteServidor();
 
+  const valores = recordar(formData, ["cantidad", "nota", "tipo"]);
   const varianteId = aTexto(formData.get("variante_id"));
   const productoId = aTexto(formData.get("producto_id"));
   const cantidad = aEntero(formData.get("cantidad"));
   const tipo = aTexto(formData.get("tipo")) as TipoMovimiento;
   const nota = aTexto(formData.get("nota"));
 
-  if (!varianteId) return { error: "Falta la variante." };
-  if (cantidad === 0) return { error: "La cantidad no puede ser cero." };
-  if (!nota) return { error: "Escribe de dónde sale o a dónde va la mercancía." };
+  if (!varianteId) return { error: "Falta la variante.", valores };
+  if (cantidad === 0) return { error: "La cantidad no puede ser cero.", valores };
+  if (!nota) {
+    return { error: "Escribe de dónde sale o a dónde va la mercancía.", valores };
+  }
 
   const { error } = await supabase.rpc("adjust_stock", {
     p_variant_id: varianteId,
@@ -332,9 +368,12 @@ export async function ajustarStock(
     // El check `stock >= 0` de la base salta si se intenta sacar más de
     // lo que hay.
     if (error.message.includes("stock")) {
-      return { error: "No puedes sacar más unidades de las que hay en bodega." };
+      return {
+        error: "No puedes sacar más unidades de las que hay en bodega.",
+        valores,
+      };
     }
-    return { error: `No se pudo ajustar: ${error.message}` };
+    return { error: `No se pudo ajustar: ${error.message}`, valores };
   }
 
   revalidatePath(`/productos/${productoId}`);
@@ -484,8 +523,11 @@ export async function crearCategoria(
   await exigirAdmin();
   const supabase = await crearClienteServidor();
 
+  const valores = recordar(formData, ["nombre", "padre"]);
   const nombres = listaSeparadaPorComas(aTexto(formData.get("nombre")));
-  if (nombres.length === 0) return { error: "Escribe el nombre de la categoría." };
+  if (nombres.length === 0) {
+    return { error: "Escribe el nombre de la categoría.", valores };
+  }
 
   const { error } = await supabase.from("categories").insert(
     nombres.map((nombre) => ({
@@ -496,8 +538,10 @@ export async function crearCategoria(
   );
 
   if (error) {
-    if (error.code === "23505") return { error: "Esa categoría ya existe." };
-    return { error: `No se pudo crear: ${error.message}` };
+    if (error.code === "23505") {
+      return { error: "Esa categoría ya existe.", valores };
+    }
+    return { error: `No se pudo crear: ${error.message}`, valores };
   }
 
   revalidatePath("/productos/categorias");

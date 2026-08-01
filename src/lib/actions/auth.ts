@@ -6,7 +6,12 @@ import { redirect } from "next/navigation";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 import { crearClienteServidor } from "@/lib/supabase/server";
 
-export type EstadoLogin = { error: string | null };
+/**
+ * `correo` vuelve al formulario porque React 19 lo reinicia cuando la
+ * acción termina: sin esto, quien se equivoca de contraseña tiene que
+ * volver a escribir también el correo.
+ */
+export type EstadoLogin = { error: string | null; correo?: string };
 
 /** Rutas a las que se permite volver tras iniciar sesión. */
 function destinoSeguro(valor: FormDataEntryValue | null): string {
@@ -32,7 +37,7 @@ export async function iniciarSesion(
   const destino = destinoSeguro(formData.get("redirigir"));
 
   if (!correo || !clave) {
-    return { error: "Escribe tu correo y tu contraseña." };
+    return { error: "Escribe tu correo y tu contraseña.", correo };
   }
 
   const supabase = await crearClienteServidor();
@@ -44,7 +49,7 @@ export async function iniciarSesion(
   if (error) {
     // Mensaje genérico a propósito: decir "ese correo no existe"
     // le regala al atacante la mitad del trabajo.
-    return { error: "Correo o contraseña incorrectos." };
+    return { error: "Correo o contraseña incorrectos.", correo };
   }
 
   revalidatePath("/", "layout");

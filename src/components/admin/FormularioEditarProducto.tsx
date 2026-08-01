@@ -27,18 +27,28 @@ export function FormularioEditarProducto({
     <form action={accion} className="flex flex-col gap-5">
       <input type="hidden" name="id" value={producto.id} />
 
-      <Campo etiqueta="Nombre" name="nombre" defaultValue={producto.name} required />
+      {/*
+        Si la acción falló, mandan los valores que venían del formulario;
+        si no, los del producto guardado. React 19 reinicia el formulario
+        al terminar la acción y sin esto se perderían las correcciones.
+      */}
+      <Campo
+        etiqueta="Nombre"
+        name="nombre"
+        defaultValue={estado.valores?.nombre ?? producto.name}
+        required
+      />
 
       <AreaTexto
         etiqueta="Descripción"
         name="descripcion"
-        defaultValue={producto.description ?? ""}
+        defaultValue={estado.valores?.descripcion ?? producto.description ?? ""}
       />
 
       <Seleccion
         etiqueta="Categoría"
         name="categoria"
-        defaultValue={producto.category_id ?? ""}
+        defaultValue={estado.valores?.categoria ?? producto.category_id ?? ""}
       >
         <option value="">Sin categoría</option>
         {categorias.map((c) => (
@@ -51,7 +61,9 @@ export function FormularioEditarProducto({
       <Casilla
         etiqueta="Destacar en la portada del catálogo"
         name="destacado"
-        defaultChecked={producto.is_featured}
+        defaultChecked={
+          estado.valores ? estado.valores.destacado === "on" : producto.is_featured
+        }
       />
 
       <Aviso>{estado.error}</Aviso>

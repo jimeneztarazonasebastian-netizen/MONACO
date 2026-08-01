@@ -25,11 +25,16 @@ export function GestorCategorias({ categorias }: { categorias: Categoria[] }) {
             etiqueta="Nombre"
             name="nombre"
             placeholder="Hombre, Mujer, Accesorios"
+            defaultValue={estado.error ? (estado.valores?.nombre ?? "") : ""}
             className="min-w-56 flex-1"
             ayuda="Separa con comas para crear varias de una vez"
             required
           />
-          <Seleccion etiqueta="Dentro de" name="padre" defaultValue="">
+          <Seleccion
+            etiqueta="Dentro de"
+            name="padre"
+            defaultValue={estado.error ? (estado.valores?.padre ?? "") : ""}
+          >
             <option value="">Nivel principal</option>
             {categorias
               .filter((c) => c.is_active && !c.parent_id)

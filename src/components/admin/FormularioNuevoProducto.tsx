@@ -31,16 +31,32 @@ export function FormularioNuevoProducto({
 
   return (
     <form action={accion} className="flex flex-col gap-8">
+      {/*
+        Los defaultValue salen del estado devuelto por la acción. React 19
+        reinicia el formulario en cuanto la acción termina, aunque haya
+        fallado; sin esto, un error de validación borraría todo lo escrito.
+      */}
       <section className="flex flex-col gap-5">
-        <Campo etiqueta="Nombre de la prenda" name="nombre" required autoFocus />
+        <Campo
+          etiqueta="Nombre de la prenda"
+          name="nombre"
+          defaultValue={estado.valores?.nombre ?? ""}
+          required
+          autoFocus
+        />
 
         <AreaTexto
           etiqueta="Descripción"
           name="descripcion"
+          defaultValue={estado.valores?.descripcion ?? ""}
           placeholder="Material, corte, cómo queda. Esto es lo que lee el cliente en el catálogo."
         />
 
-        <Seleccion etiqueta="Categoría" name="categoria" defaultValue="">
+        <Seleccion
+          etiqueta="Categoría"
+          name="categoria"
+          defaultValue={estado.valores?.categoria ?? ""}
+        >
           <option value="">Sin categoría</option>
           {categorias.map((c) => (
             <option key={c.id} value={c.id}>
@@ -49,7 +65,11 @@ export function FormularioNuevoProducto({
           ))}
         </Seleccion>
 
-        <Casilla etiqueta="Destacar en la portada del catálogo" name="destacado" />
+        <Casilla
+          etiqueta="Destacar en la portada del catálogo"
+          name="destacado"
+          defaultChecked={estado.valores?.destacado === "on"}
+        />
       </section>
 
       <section className="flex flex-col gap-4">
