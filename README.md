@@ -35,7 +35,7 @@ cerradas.
 
 | Paso | Módulo | Estado |
 |---|---|---|
-| 1 | Proyecto Next.js y conexión a Supabase | Hecho (falta la base) |
+| 1 | Proyecto Next.js y conexión a Supabase | Hecho |
 | 2 | Auth, middleware de sesión, layout de administración | Hecho |
 | 3 | CRUD de productos y variantes | Pendiente |
 | 4 | POS: caja, lector, pago, tirilla, turno | Pendiente |

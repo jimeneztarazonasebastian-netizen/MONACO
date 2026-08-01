@@ -7,6 +7,23 @@ sola no corre.
 |---|---|
 | `0001_monaco_schema.sql` | Esquema base: catálogo, variantes, ventas, kardex, RLS y las funciones `create_web_order`, `confirm_web_order`, `find_by_barcode` |
 | `0002_barcodes_turnos_precios.sql` | Códigos de barras mixtos, turnos de caja, precios por variante, `create_pos_sale` y `adjust_stock` |
+| `0003_cierra_permisos.sql` | Cierra los huecos que reportó el linter de Supabase al aplicar las dos anteriores |
+
+Las tres están **aplicadas** en el proyecto `ygtlkxwlbxahpqcztxcm`.
+
+## Por qué existió la 0003
+
+El `revoke ... from anon` de la 0002 no servía para nada. PostgreSQL le
+concede `EXECUTE` a `PUBLIC` en toda función nueva, y `anon` hereda de
+`PUBLIC`: revocarle a `anon` directamente no toca esa herencia.
+
+El caso grave era `cash_session_summary`, que no valida nada por dentro. Un
+visitante anónimo podía pedir `/rest/v1/rpc/cash_session_summary` y leer el
+nombre del cajero, las ventas del turno y cuánto efectivo debía haber en la
+caja. Las demás funciones se salvaban por sus propias validaciones, pero
+depender de eso es apostar.
+
+La regla, para no repetirlo: **revocar siempre a `PUBLIC`, no a `anon`.**
 
 ## La 0001 está reconstruida
 
@@ -41,7 +58,21 @@ Dos advertencias sobre esa prueba:
 La 0001 crea `pgcrypto` y `unaccent`. Sin `unaccent`, el trigger
 `t_variant_defaults` de la 0002 falla al insertar la primera variante sin SKU.
 
-## Anotado para una futura 0003
+## Advertencias que quedan, y por qué se dejan
+
+El linter sigue reportando tres cosas. Ninguna es un defecto:
+
+- **`rls_auto_enable` ejecutable por `anon`.** No es nuestra: es un event
+  trigger de la plataforma de Supabase que activa RLS en tablas nuevas. No se
+  toca.
+- **Funciones `SECURITY DEFINER` ejecutables por `authenticated`.** Es toda la
+  arquitectura: la lógica de negocio vive en funciones que el personal llama.
+  El control de rol está dentro de cada una.
+- **Políticas de `customers` con `WITH CHECK (true)`.** Cualquier miembro del
+  personal puede registrar y corregir clientes, que es justo lo que dice el
+  CLAUDE.md. Borrar sí quedó reservado al dueño.
+
+## Anotado para una futura 0004
 
 No bloquean nada hoy, pero conviene no olvidarlos:
 
@@ -54,5 +85,3 @@ No bloquean nada hoy, pero conviene no olvidarlos:
    el local, toca una tabla `cash_movements`.
 3. **`create_pos_sale` no valida `p_discount`.** Un descuento negativo infla el
    total; uno mayor que el subtotal deja la venta en negativo.
-4. **Las vistas de la 0002 no tienen `security_invoker`.** Las de la 0001 sí.
-   Sin eso, una vista puede dejar leer lo que RLS estaba tapando.
