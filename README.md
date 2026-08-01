@@ -43,7 +43,7 @@ cerradas.
 | 6 | Checkout a WhatsApp y bandeja de pedidos | Hecho |
 | 7 | Reportes | Pendiente |
 
-`/ventas` (historial y reimpresión) sigue siendo un marcador.
+El paso 7 (reportes) es lo único que falta.
 
 ## Comandos
 

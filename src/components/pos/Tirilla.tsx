@@ -1,7 +1,23 @@
 "use client";
 
 import { fechaHora, pesos } from "@/lib/formato";
-import type { LineaCarrito } from "@/store/pos";
+
+/**
+ * Lo mínimo que necesita una línea para imprimirse.
+ *
+ * Se define aquí y no se toma del carrito del POS porque la tirilla se
+ * imprime en dos momentos: al cerrar la venta, desde el carrito en
+ * memoria, y al reimprimirla meses después, desde `sale_items`. Las
+ * líneas del carrito encajan por forma, sin conversión.
+ */
+export type LineaTirilla = {
+  variantId: string;
+  productName: string;
+  size: string;
+  color: string;
+  precio: number;
+  cantidad: number;
+};
 
 export type DatosTienda = {
   store_name: string;
@@ -14,7 +30,7 @@ export type TirillaVenta = {
   numero: string;
   fecha: string;
   cajero: string;
-  lineas: LineaCarrito[];
+  lineas: LineaTirilla[];
   descuento: number;
   total: number;
   pagos: { metodo: string; monto: number }[];
