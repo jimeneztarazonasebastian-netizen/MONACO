@@ -19,6 +19,7 @@ const ENLACES: Enlace[] = [
   { href: "/pedidos", etiqueta: "Pedidos web", soloAdmin: true },
   { href: "/productos", etiqueta: "Productos", soloAdmin: true },
   { href: "/inventario", etiqueta: "Inventario", soloAdmin: true },
+  { href: "/reportes", etiqueta: "Reportes", soloAdmin: true },
   { href: "/configuracion", etiqueta: "Configuración", soloAdmin: true },
 ];
 

@@ -41,9 +41,14 @@ cerradas.
 | 4 | POS: caja, lector, pago, tirilla, turno | Hecho |
 | 5 | Catálogo público, filtros y carrito | Hecho |
 | 6 | Checkout a WhatsApp y bandeja de pedidos | Hecho |
-| 7 | Reportes | Pendiente |
+| 7 | Reportes | Hecho |
 
-El paso 7 (reportes) es lo único que falta.
+Los siete pasos del `CLAUDE.md` están construidos.
+
+**Pendiente antes de publicar:** poner el número real de WhatsApp en
+Configuración, y regenerar `src/types/database.ts` para que incluya las
+funciones de reporte de la migración 0007 (hoy se llaman desde
+`src/lib/reportes.ts`, que tiene los tipos escritos a mano).
 
 ## Comandos
 

@@ -11,6 +11,7 @@ const RUTAS_PRIVADAS = [
   "/ventas",
   "/pedidos",
   "/caja",
+  "/reportes",
   "/configuracion",
 ];
 
