@@ -83,15 +83,18 @@ export default async function PaginaReportes({
 
   const periodo = { p_desde: pDesde, p_hasta: pHasta };
 
-  const [general, dias, metodos, prendas] = await Promise.all([
-    reportes.resumen(supabase, periodo),
-    reportes.porDia(supabase, periodo),
-    reportes.porMetodo(supabase, periodo),
-    reportes.topPrendas(supabase, periodo),
+  const [general, porDia, porMetodo, top] = await Promise.all([
+    supabase.rpc("reporte_resumen", periodo),
+    supabase.rpc("reporte_por_dia", periodo),
+    supabase.rpc("reporte_por_metodo", periodo),
+    supabase.rpc("reporte_top_prendas", { ...periodo, p_limite: 15 }),
   ]);
 
-  const resumen = general.filas[0] ?? null;
-  const error = general.error;
+  const resumen: reportes.Resumen | null = general.data?.[0] ?? null;
+  const error = general.error?.message ?? null;
+  const dias = { filas: (porDia.data ?? []) as reportes.PorDia[] };
+  const metodos = { filas: (porMetodo.data ?? []) as reportes.PorMetodo[] };
+  const prendas = { filas: (top.data ?? []) as reportes.TopPrenda[] };
 
   const margenPorcentaje =
     resumen && resumen.ingresos > 0

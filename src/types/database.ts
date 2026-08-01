@@ -22,6 +22,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      cash_movements: {
+        Row: {
+          amount: number
+          cash_session_id: string
+          created_at: string
+          id: string
+          reason: string
+          type: Database["public"]["Enums"]["cash_movement_type"]
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          cash_session_id: string
+          created_at?: string
+          id?: string
+          reason: string
+          type: Database["public"]["Enums"]["cash_movement_type"]
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          cash_session_id?: string
+          created_at?: string
+          id?: string
+          reason?: string
+          type?: Database["public"]["Enums"]["cash_movement_type"]
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_movements_cash_session_id_fkey"
+            columns: ["cash_session_id"]
+            isOneToOne: false
+            referencedRelation: "cash_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_movements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cash_sessions: {
         Row: {
           closed_at: string | null
@@ -474,6 +519,80 @@ export type Database = {
           },
         ]
       }
+      sale_returns: {
+        Row: {
+          amount: number
+          color: string | null
+          created_at: string
+          id: string
+          product_name: string
+          quantity: number
+          reason: string
+          sale_id: string
+          sale_item_id: string | null
+          size: string | null
+          user_id: string | null
+          variant_id: string | null
+        }
+        Insert: {
+          amount: number
+          color?: string | null
+          created_at?: string
+          id?: string
+          product_name: string
+          quantity: number
+          reason: string
+          sale_id: string
+          sale_item_id?: string | null
+          size?: string | null
+          user_id?: string | null
+          variant_id?: string | null
+        }
+        Update: {
+          amount?: number
+          color?: string | null
+          created_at?: string
+          id?: string
+          product_name?: string
+          quantity?: number
+          reason?: string
+          sale_id?: string
+          sale_item_id?: string | null
+          size?: string | null
+          user_id?: string | null
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_returns_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_returns_sale_item_id_fkey"
+            columns: ["sale_item_id"]
+            isOneToOne: false
+            referencedRelation: "sale_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_returns_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_returns_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sales: {
         Row: {
           cash_session_id: string | null
@@ -668,6 +787,7 @@ export type Database = {
         }
         Returns: number
       }
+      cash_esperado: { Args: { p_session: string }; Returns: number }
       cash_session_summary: {
         Args: { p_session_id?: string }
         Returns: {
@@ -677,8 +797,10 @@ export type Database = {
           cajero: string
           daviplata: number
           efectivo: number
+          entradas: number
           esperado_en_caja: number
           nequi: number
+          salidas: number
           session_id: string
           tarjeta: number
           total_vendido: number
@@ -848,6 +970,79 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      register_cash_movement: {
+        Args: {
+          p_monto: number
+          p_motivo: string
+          p_tipo: Database["public"]["Enums"]["cash_movement_type"]
+        }
+        Returns: {
+          amount: number
+          cash_session_id: string
+          created_at: string
+          id: string
+          reason: string
+          type: Database["public"]["Enums"]["cash_movement_type"]
+          user_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "cash_movements"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      reporte_por_dia: {
+        Args: { p_desde: string; p_hasta: string }
+        Returns: {
+          costo: number
+          dia: string
+          ingresos: number
+          margen: number
+          ventas: number
+        }[]
+      }
+      reporte_por_metodo: {
+        Args: { p_desde: string; p_hasta: string }
+        Returns: {
+          cobros: number
+          metodo: string
+          total: number
+        }[]
+      }
+      reporte_resumen: {
+        Args: { p_desde: string; p_hasta: string }
+        Returns: {
+          costo: number
+          descuentos: number
+          devoluciones: number
+          ingresos: number
+          margen: number
+          ticket_promedio: number
+          unidades: number
+          ventas: number
+        }[]
+      }
+      reporte_top_prendas: {
+        Args: { p_desde: string; p_hasta: string; p_limite?: number }
+        Returns: {
+          color: string
+          ingresos: number
+          margen: number
+          producto: string
+          talla: string
+          unidades: number
+        }[]
+      }
+      return_sale_items: {
+        Args: {
+          p_items: Json
+          p_motivo: string
+          p_reintegro_efectivo?: boolean
+          p_sale_id: string
+        }
+        Returns: number
+      }
       set_price_by_size: {
         Args: { p_prices: Json; p_product_id: string }
         Returns: number
@@ -856,9 +1051,40 @@ export type Database = {
         Args: { p_price: number; p_product_id: string }
         Returns: number
       }
+      void_sale: {
+        Args: { p_motivo: string; p_sale_id: string }
+        Returns: {
+          cash_session_id: string | null
+          cashier_id: string | null
+          channel: Database["public"]["Enums"]["sale_channel"]
+          created_at: string
+          customer_id: string | null
+          dian_cufe: string | null
+          dian_number: string | null
+          dian_prefix: string | null
+          dian_response: Json | null
+          dian_status: string | null
+          discount: number
+          id: string
+          notes: string | null
+          number: string
+          paid_at: string | null
+          status: Database["public"]["Enums"]["sale_status"]
+          subtotal: number
+          total: number
+          voided_at: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "sales"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       barcode_source: "fabrica" | "interno"
+      cash_movement_type: "entrada" | "salida"
       movement_type: "venta" | "devolucion" | "entrada" | "ajuste" | "merma"
       payment_method:
         | "efectivo"
@@ -997,6 +1223,7 @@ export const Constants = {
   public: {
     Enums: {
       barcode_source: ["fabrica", "interno"],
+      cash_movement_type: ["entrada", "salida"],
       movement_type: ["venta", "devolucion", "entrada", "ajuste", "merma"],
       payment_method: [
         "efectivo",

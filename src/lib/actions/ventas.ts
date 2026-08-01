@@ -103,6 +103,96 @@ export type ResultadoVenta =
   | { ok: false; error: string };
 
 /**
+ * Anula una venta y devuelve el stock.
+ *
+ * No se borra: el número de tirilla que el cliente tiene en la mano
+ * tiene que seguir existiendo, aunque sea para decir que se anuló y por
+ * qué. La función de la base repone cada prenda y lo escribe en el
+ * kardex.
+ */
+export async function anularVenta(
+  ventaId: string,
+  motivo: string,
+  reintegroEfectivo: boolean,
+): Promise<{ ok: boolean; error?: string }> {
+  await exigirSesion();
+  const supabase = await crearClienteServidor();
+
+  const { error } = await supabase.rpc("void_sale", {
+    p_sale_id: ventaId,
+    p_motivo: motivo,
+    p_reintegro_efectivo: reintegroEfectivo,
+  });
+
+  if (error) {
+    if (error.message.includes("Solo el administrador")) {
+      return { ok: false, error: "Solo el dueño puede anular ventas." };
+    }
+    if (error.message.includes("ya está anulada")) {
+      return { ok: false, error: "Esa venta ya estaba anulada." };
+    }
+    if (error.message.includes("No hay turno abierto")) {
+      return {
+        ok: false,
+        error:
+          "Para devolver la plata del cajón hace falta un turno abierto. Ábrelo o desmarca el reintegro en efectivo.",
+      };
+    }
+    return { ok: false, error: error.message };
+  }
+
+  revalidatePath("/ventas");
+  revalidatePath(`/ventas/${ventaId}`);
+  revalidatePath("/inventario");
+  revalidatePath("/caja");
+  return { ok: true };
+}
+
+/**
+ * Devuelve prendas sueltas de una venta.
+ *
+ * Un cambio de talla se hace con esto más una venta nueva: se devuelve
+ * la que no sirvió y se vende la que sí. Así el stock de cada talla
+ * queda bien y el kardex cuenta la historia completa.
+ */
+export async function devolverPrendas(
+  ventaId: string,
+  items: { sale_item_id: string; quantity: number }[],
+  motivo: string,
+  reintegroEfectivo: boolean,
+): Promise<{ ok: boolean; devuelto?: number; error?: string }> {
+  await exigirSesion();
+  const supabase = await crearClienteServidor();
+
+  const { data: datos, error } = await supabase.rpc("return_sale_items", {
+    p_sale_id: ventaId,
+    p_items: items,
+    p_motivo: motivo,
+    p_reintegro_efectivo: reintegroEfectivo,
+  });
+
+  if (error) {
+    if (error.message.includes("Solo el administrador")) {
+      return { ok: false, error: "Solo el dueño puede registrar devoluciones." };
+    }
+    if (error.message.includes("No hay turno abierto")) {
+      return {
+        ok: false,
+        error:
+          "Para devolver la plata del cajón hace falta un turno abierto. Ábrelo o desmarca el reintegro en efectivo.",
+      };
+    }
+    return { ok: false, error: error.message };
+  }
+
+  revalidatePath("/ventas");
+  revalidatePath(`/ventas/${ventaId}`);
+  revalidatePath("/inventario");
+  revalidatePath("/caja");
+  return { ok: true, devuelto: Number(datos ?? 0) };
+}
+
+/**
  * Registra la venta.
  *
  * Toda la lógica pesada vive en `create_pos_sale`: bloquea las

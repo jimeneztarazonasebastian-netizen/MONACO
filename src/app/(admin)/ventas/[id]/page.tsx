@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { AccionesVenta } from "@/components/admin/AccionesVenta";
 import { BotonReimprimir } from "@/components/admin/BotonReimprimir";
 import { fechaHora, pesos } from "@/lib/formato";
 import { exigirSesion } from "@/lib/sesion";
@@ -32,7 +33,7 @@ export default async function PaginaVenta({
   const { id } = await params;
   const supabase = await crearClienteServidor();
 
-  const [{ data: venta }, { data: tienda }] = await Promise.all([
+  const [{ data: venta }, { data: tienda }, { data: devoluciones }] = await Promise.all([
     supabase
       .from("sales")
       .select(
@@ -44,6 +45,11 @@ export default async function PaginaVenta({
       .from("store_settings")
       .select("store_name, address, whatsapp, receipt_footer")
       .maybeSingle(),
+    supabase
+      .from("sale_returns")
+      .select("id, sale_item_id, product_name, size, color, quantity, amount, reason, created_at")
+      .eq("sale_id", id)
+      .order("created_at", { ascending: false }),
   ]);
 
   if (!venta) notFound();
@@ -178,6 +184,53 @@ export default async function PaginaVenta({
       {venta.notes ? (
         <p className="mb-8 text-sm text-gris print:hidden">{venta.notes}</p>
       ) : null}
+
+      {devoluciones && devoluciones.length > 0 ? (
+        <section className="mb-8 print:hidden">
+          <h2 className="fuente-display mb-4 text-sm">Devoluciones</h2>
+          <ul className="flex flex-col">
+            {devoluciones.map((d) => (
+              <li
+                key={d.id}
+                className="flex flex-wrap items-baseline justify-between gap-3 border-b border-humo py-3 text-sm"
+              >
+                <span className="min-w-40 flex-1">
+                  <span className="block text-blanco">
+                    {d.quantity} × {d.product_name}
+                    <span className="font-mono text-xs text-gris">
+                      {" "}
+                      {d.size}/{d.color}
+                    </span>
+                  </span>
+                  <span className="block text-xs text-gris">
+                    {d.reason} · {fechaHora(d.created_at)}
+                  </span>
+                </span>
+                <span className="font-mono text-rojo">-{pesos(d.amount)}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      <div className="mb-8">
+        <AccionesVenta
+          ventaId={venta.id}
+          numero={venta.number}
+          anulada={venta.status === "anulada"}
+          items={(venta.sale_items ?? []).map((i) => ({
+            id: i.id,
+            product_name: i.product_name,
+            size: i.size,
+            color: i.color,
+            quantity: i.quantity,
+            unit_price: i.unit_price,
+            devuelto: (devoluciones ?? [])
+              .filter((d) => d.sale_item_id === i.id)
+              .reduce((s, d) => s + d.quantity, 0),
+          }))}
+        />
+      </div>
 
       <BotonReimprimir
         venta={{

@@ -42,6 +42,55 @@ export async function abrirTurno(
 }
 
 /**
+ * Entradas y salidas de efectivo que no son ventas: plata para el
+ * domicilio, un gasto, o un cambio que se repone.
+ *
+ * Sin esto, sacar 20.000 del cajón aparecía como faltante al cierre y se
+ * lo cargaba el cajero.
+ */
+export async function moverEfectivo(
+  _previo: EstadoFormulario,
+  formData: FormData,
+): Promise<EstadoFormulario> {
+  await exigirSesion();
+  const supabase = await crearClienteServidor();
+
+  const tipo = aTexto(formData.get("tipo"));
+  const monto = aPesos(formData.get("monto"));
+  const motivo = aTexto(formData.get("motivo"));
+  const valores = {
+    tipo,
+    monto: aTexto(formData.get("monto")),
+    motivo,
+  };
+
+  if (tipo !== "entrada" && tipo !== "salida") {
+    return { error: "Elige si entra o sale plata.", valores };
+  }
+  if (monto <= 0) return { error: "El monto debe ser mayor que cero.", valores };
+  if (!motivo) {
+    return { error: "Escribe de dónde sale o a dónde va la plata.", valores };
+  }
+
+  const { error } = await supabase.rpc("register_cash_movement", {
+    p_tipo: tipo,
+    p_monto: monto,
+    p_motivo: motivo,
+  });
+
+  if (error) {
+    if (error.message.includes("solo hay")) return { error: error.message, valores };
+    if (error.message.includes("No hay turno abierto")) {
+      return { error: "No hay turno abierto. Ábrelo antes de mover efectivo.", valores };
+    }
+    return { error: `No se pudo registrar: ${error.message}`, valores };
+  }
+
+  revalidatePath("/caja");
+  return { error: null, ok: true };
+}
+
+/**
  * Cierra el turno contra el conteo físico del efectivo.
  *
  * Solo el efectivo cuadra: Nequi, Daviplata, tarjeta y Bancolombia no

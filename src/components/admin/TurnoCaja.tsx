@@ -2,8 +2,14 @@
 
 import { useActionState } from "react";
 
-import { AreaTexto, Aviso, BotonEnviar, Campo } from "@/components/ui/campos";
-import { abrirTurno, cerrarTurno } from "@/lib/actions/caja";
+import {
+  AreaTexto,
+  Aviso,
+  BotonEnviar,
+  Campo,
+  Seleccion,
+} from "@/components/ui/campos";
+import { abrirTurno, cerrarTurno, moverEfectivo } from "@/lib/actions/caja";
 import { ESTADO_INICIAL } from "@/lib/actions/estado";
 import { fechaHora, pesos } from "@/lib/formato";
 
@@ -19,8 +25,67 @@ export type ResumenTurno = {
   daviplata: number;
   bancolombia: number;
   tarjeta: number;
+  entradas: number;
+  salidas: number;
   esperado_en_caja: number;
 };
+
+export type MovimientoCaja = {
+  id: string;
+  type: "entrada" | "salida";
+  amount: number;
+  reason: string;
+  created_at: string;
+};
+
+/** Entradas y salidas de efectivo que no vienen de una venta. */
+export function MoverEfectivo({ disponible }: { disponible: number }) {
+  const [estado, accion] = useActionState(moverEfectivo, ESTADO_INICIAL);
+
+  return (
+    <form action={accion} className="bisel border border-humo bg-carbon p-6">
+      <h2 className="fuente-display mb-2 text-lg">Mover efectivo</h2>
+      <p className="mb-6 text-sm leading-relaxed text-gris">
+        Plata que entra o sale del cajón sin ser una venta: el domicilio, un
+        gasto, un cambio que se repone. Queda en el arqueo, así que ya no
+        aparece como faltante al cierre.
+      </p>
+
+      <div className="flex flex-wrap items-end gap-4">
+        <Seleccion etiqueta="Qué pasa" name="tipo" defaultValue={estado.valores?.tipo ?? "salida"}>
+          <option value="salida">Sale del cajón</option>
+          <option value="entrada">Entra al cajón</option>
+        </Seleccion>
+        <Campo
+          etiqueta="Monto"
+          name="monto"
+          inputMode="numeric"
+          placeholder="20000"
+          defaultValue={estado.valores?.monto ?? ""}
+          className="w-40"
+          required
+        />
+        <Campo
+          etiqueta="Motivo"
+          name="motivo"
+          placeholder="Domicilio de la mañana"
+          defaultValue={estado.valores?.motivo ?? ""}
+          className="min-w-56 flex-1"
+          required
+        />
+        <BotonEnviar variante="secundario">Registrar</BotonEnviar>
+      </div>
+
+      <p className="mt-3 font-mono text-xs text-gris">
+        Hay {pesos(disponible)} en el cajón ahora mismo.
+      </p>
+
+      <div className="mt-4">
+        <Aviso>{estado.error}</Aviso>
+      </div>
+    </form>
+  );
+}
 
 export function AbrirTurno() {
   const [estado, accion] = useActionState(abrirTurno, ESTADO_INICIAL);
@@ -114,6 +179,20 @@ export function CerrarTurno({ resumen }: { resumen: ResumenTurno }) {
         ) : null}
         {resumen.tarjeta > 0 ? (
           <Renglon etiqueta="Tarjeta" valor={pesos(resumen.tarjeta)} />
+        ) : null}
+
+        {resumen.entradas > 0 || resumen.salidas > 0 ? (
+          <>
+            <p className="mt-6 mb-2 text-xs tracking-[0.16em] text-gris uppercase">
+              Movimientos del cajón
+            </p>
+            {resumen.entradas > 0 ? (
+              <Renglon etiqueta="Entró" valor={pesos(resumen.entradas)} />
+            ) : null}
+            {resumen.salidas > 0 ? (
+              <Renglon etiqueta="Salió" valor={`-${pesos(resumen.salidas)}`} />
+            ) : null}
+          </>
         ) : null}
 
         <div className="mt-6 border-t-2 border-rojo pt-4">
