@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { Campo, Etiqueta } from "@/components/ui/campos";
-import { listaSeparadaPorComas } from "@/lib/texto";
+import { listaSeparadaPorComas, plural } from "@/lib/texto";
 
 export type FilaVariante = {
   size: string;
@@ -231,7 +231,8 @@ export function EditorVariantes({
         </button>
         {filas.length > 0 ? (
           <p className="font-mono text-sm text-gris">
-            {filas.length} variantes · {total} unidades
+            {plural(filas.length, "variante", "variantes")} ·{" "}
+            {plural(total, "unidad", "unidades")}
           </p>
         ) : null}
       </div>

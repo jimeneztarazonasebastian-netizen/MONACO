@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { primeraImagen } from "@/lib/imagenes";
 import { pesos } from "@/lib/formato";
+import { plural } from "@/lib/texto";
 import { exigirAdmin } from "@/lib/sesion";
 import { crearClienteServidor } from "@/lib/supabase/server";
 
@@ -143,7 +144,8 @@ export default async function PaginaProductos({
                           : `desde ${pesos(Math.min(...precios))}`}
                     </p>
                     <p className="mt-1 font-mono text-xs text-gris">
-                      {activas.length} variantes · {stock} en bodega
+                      {plural(activas.length, "variante", "variantes")} ·{" "}
+                      {plural(stock, "unidad", "unidades")} en bodega
                     </p>
                   </div>
                 </Link>

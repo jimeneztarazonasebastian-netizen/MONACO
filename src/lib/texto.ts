@@ -64,3 +64,8 @@ export function aEntero(valor: FormDataEntryValue | null | undefined): number {
 export function aTexto(valor: FormDataEntryValue | null | undefined): string {
   return String(valor ?? "").trim();
 }
+
+/** plural(1, "variante", "variantes") → "1 variante" */
+export function plural(cantidad: number, singular: string, plural: string): string {
+  return `${cantidad} ${cantidad === 1 ? singular : plural}`;
+}
