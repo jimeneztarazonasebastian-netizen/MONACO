@@ -48,7 +48,15 @@ function CodigoBarras({ codigo }: { codigo: string }) {
   return <svg ref={ref} />;
 }
 
-export function ColaEtiquetas({ pendientes }: { pendientes: VariantePendiente[] }) {
+export function ColaEtiquetas({
+  pendientes,
+  nombreTienda,
+  slogan,
+}: {
+  pendientes: VariantePendiente[];
+  nombreTienda: string;
+  slogan: string | null;
+}) {
   const [elegidas, setElegidas] = useState<Set<string>>(
     () => new Set(pendientes.map((p) => p.id)),
   );
@@ -155,20 +163,61 @@ export function ColaEtiquetas({ pendientes }: { pendientes: VariantePendiente[] 
           <div
             key={v.id}
             style={{
+              paddingBottom: "3mm",
+              marginBottom: "3mm",
               borderBottom: "1px dashed #000",
-              paddingBottom: "2mm",
-              marginBottom: "2mm",
               textAlign: "center",
             }}
           >
-            <div style={{ fontSize: "11px", fontWeight: 700 }}>{v.product}</div>
-            <div style={{ fontSize: "10px" }}>
-              {v.size} · {v.color}
+            {/* La marca va arriba: la etiqueta viaja colgada de la
+                prenda y a veces es lo único que el cliente conserva. */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "1.5mm",
+                marginBottom: "0.5mm",
+              }}
+            >
+              <svg viewBox="0 0 40 40" width="11" height="11" fill="none" aria-hidden="true">
+                <path
+                  d="M5 33V7l15 18L35 7v26"
+                  stroke="#000"
+                  strokeWidth="4"
+                  strokeLinecap="square"
+                  strokeLinejoin="miter"
+                />
+              </svg>
+              <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "2.5px" }}>
+                {nombreTienda.toUpperCase()}
+              </span>
             </div>
-            <div style={{ fontSize: "14px", fontWeight: 700, margin: "1mm 0" }}>
+
+            {slogan ? (
+              <div style={{ fontSize: "7px", letterSpacing: "1.5px", textTransform: "uppercase" }}>
+                {slogan}
+              </div>
+            ) : null}
+
+            <div style={{ borderTop: "1px solid #000", margin: "1.5mm 0" }} />
+
+            <div style={{ fontSize: "11px", fontWeight: 700, lineHeight: 1.25 }}>
+              {v.product}
+            </div>
+            <div style={{ fontSize: "10px", letterSpacing: "1px" }}>
+              TALLA {v.size.toUpperCase()} · {v.color.toUpperCase()}
+            </div>
+
+            <div style={{ fontSize: "18px", fontWeight: 700, margin: "1.5mm 0 1mm" }}>
               {pesos(v.sale_price)}
             </div>
+
             <CodigoBarras codigo={v.barcode} />
+
+            <div style={{ fontSize: "7px", letterSpacing: "0.5px", marginTop: "0.5mm" }}>
+              {v.sku}
+            </div>
           </div>
         ))}
       </div>

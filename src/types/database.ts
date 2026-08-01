@@ -687,6 +687,7 @@ export type Database = {
           id: boolean
           receipt_footer: string | null
           schedule: string | null
+          slogan: string | null
           store_name: string
           updated_at: string
           whatsapp: string | null
@@ -696,6 +697,7 @@ export type Database = {
           id?: boolean
           receipt_footer?: string | null
           schedule?: string | null
+          slogan?: string | null
           store_name?: string
           updated_at?: string
           whatsapp?: string | null
@@ -705,6 +707,7 @@ export type Database = {
           id?: boolean
           receipt_footer?: string | null
           schedule?: string | null
+          slogan?: string | null
           store_name?: string
           updated_at?: string
           whatsapp?: string | null

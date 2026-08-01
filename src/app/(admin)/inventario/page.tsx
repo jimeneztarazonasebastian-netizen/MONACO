@@ -49,6 +49,15 @@ export default async function PaginaInventario({
       supabase.from("v_labels_pending").select("*", { count: "exact", head: true }),
     ]);
 
+  // La etiqueta lleva la marca, así que necesita el nombre y el eslogan.
+  const { data: tienda } =
+    vista === "etiquetas"
+      ? await supabase
+          .from("store_settings")
+          .select("store_name, slogan")
+          .maybeSingle()
+      : { data: null };
+
   const { data: movimientos } =
     vista === "kardex"
       ? await supabase
@@ -131,7 +140,11 @@ export default async function PaginaInventario({
       ) : null}
 
       {vista === "etiquetas" ? (
-        <ColaEtiquetas pendientes={(etiquetas ?? []) as VariantePendiente[]} />
+        <ColaEtiquetas
+          pendientes={(etiquetas ?? []) as VariantePendiente[]}
+          nombreTienda={tienda?.store_name ?? "Mónaco"}
+          slogan={tienda?.slogan ?? null}
+        />
       ) : null}
 
       {vista === "kardex" ? (

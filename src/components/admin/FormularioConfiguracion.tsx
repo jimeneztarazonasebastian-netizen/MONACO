@@ -26,6 +26,14 @@ export function FormularioConfiguracion({
       />
 
       <Campo
+        etiqueta="Eslogan"
+        name="slogan"
+        defaultValue={v?.slogan ?? ajustes.slogan ?? ""}
+        placeholder="Entrena en serio"
+        ayuda="Va bajo el logo en la tirilla, en las etiquetas y en la portada del catálogo"
+      />
+
+      <Campo
         etiqueta="WhatsApp"
         name="whatsapp"
         inputMode="tel"

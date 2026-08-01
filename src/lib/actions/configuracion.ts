@@ -8,7 +8,14 @@ import { crearClienteServidor } from "@/lib/supabase/server";
 import { aTexto } from "@/lib/texto";
 import { esNumeroValido } from "@/lib/whatsapp";
 
-const CAMPOS = ["store_name", "whatsapp", "address", "schedule", "receipt_footer"];
+const CAMPOS = [
+  "store_name",
+  "slogan",
+  "whatsapp",
+  "address",
+  "schedule",
+  "receipt_footer",
+];
 
 export async function guardarConfiguracion(
   _previo: EstadoFormulario,
@@ -38,6 +45,7 @@ export async function guardarConfiguracion(
     .from("store_settings")
     .update({
       store_name: valores.store_name,
+      slogan: valores.slogan || null,
       whatsapp: valores.whatsapp || null,
       address: valores.address || null,
       schedule: valores.schedule || null,

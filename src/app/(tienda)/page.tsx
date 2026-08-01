@@ -10,19 +10,25 @@ import { crearClienteServidor } from "@/lib/supabase/server";
 export default async function PaginaInicio() {
   const supabase = await crearClienteServidor();
 
-  const { data: destacadas } = await supabase
-    .from("v_catalog")
-    .select("id, name, slug, images, price_from, price_varies, total_stock, sizes")
-    .eq("is_featured", true)
-    .limit(8);
+  const [{ data: destacadas }, { data: tienda }] = await Promise.all([
+    supabase
+      .from("v_catalog")
+      .select("id, name, slug, images, price_from, price_varies, total_stock, sizes")
+      .eq("is_featured", true)
+      .limit(8),
+    supabase.from("store_settings").select("slogan, address").maybeSingle(),
+  ]);
 
   return (
     <>
       <section className="border-b border-humo px-5 py-24 text-center sm:py-32">
         <Monograma className="mx-auto mb-8 h-16 w-16 text-blanco" />
-        <h1 className="fuente-display mb-5 text-3xl sm:text-5xl">Mónaco</h1>
+        <h1 className="fuente-display mb-4 text-3xl sm:text-5xl">Mónaco</h1>
+        {tienda?.slogan ? (
+          <p className="fuente-display mb-6 text-sm text-rojo">{tienda.slogan}</p>
+        ) : null}
         <p className="mx-auto mb-10 max-w-md leading-relaxed text-gris">
-          Ropa deportiva para entrenar en serio. Barrancabermeja.
+          Ropa deportiva. Barrancabermeja.
         </p>
         <Link
           href="/catalogo"
