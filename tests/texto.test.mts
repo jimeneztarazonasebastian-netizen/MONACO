@@ -7,6 +7,7 @@ import {
   aSlug,
   aTexto,
   listaSeparadaPorComas,
+  ordenarTallas,
   plural,
 } from "../src/lib/texto.ts";
 
@@ -52,6 +53,18 @@ test("plural concuerda en singular", () => {
   assert.equal(plural(1, "variante", "variantes"), "1 variante");
   assert.equal(plural(0, "variante", "variantes"), "0 variantes");
   assert.equal(plural(20, "unidad", "unidades"), "20 unidades");
+});
+
+test("las tallas se ordenan como en una tienda, no alfabéticamente", () => {
+  // Alfabéticamente daría L, M, S, que se lee como un error.
+  assert.deepEqual(ordenarTallas(["L", "M", "S"]), ["S", "M", "L"]);
+  assert.deepEqual(ordenarTallas(["XL", "S", "XXL", "M"]), ["S", "M", "XL", "XXL"]);
+  assert.deepEqual(ordenarTallas(["m", "s"]), ["s", "m"]);
+});
+
+test("las tallas fuera de la escala van después y en orden sensato", () => {
+  assert.deepEqual(ordenarTallas(["Única", "M", "S"]), ["S", "M", "Única"]);
+  assert.deepEqual(ordenarTallas(["38", "30", "34"]), ["30", "34", "38"]);
 });
 
 test("aTexto recorta y tolera nulos", () => {

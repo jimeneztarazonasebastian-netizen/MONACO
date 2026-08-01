@@ -97,8 +97,24 @@ body {
   }
 
   #tirilla,
-  #tirilla * {
+  #tirilla *,
+  #etiquetas,
+  #etiquetas * {
     visibility: visible;
+  }
+
+  /* Las etiquetas salen por la misma impresora térmica que la tirilla:
+     una tienda que arranca no compra dos. Van apiladas en la misma
+     columna de 58 mm, separadas por una línea de corte. */
+  #etiquetas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 58mm;
+    padding: 2mm;
+    background: #fff;
+    color: #000;
+    font-family: var(--font-mono);
   }
 
   #tirilla {

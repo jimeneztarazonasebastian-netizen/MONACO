@@ -39,12 +39,11 @@ cerradas.
 | 2 | Auth, middleware de sesión, layout de administración | Hecho |
 | 3 | CRUD de productos y variantes | Hecho |
 | 4 | POS: caja, lector, pago, tirilla, turno | Hecho |
-| 5 | Catálogo público, filtros y carrito | Pendiente |
+| 5 | Catálogo público, filtros y carrito | Hecho |
 | 6 | Checkout a WhatsApp y bandeja de pedidos | Pendiente |
 | 7 | Reportes | Pendiente |
 
-Las pantallas de los pasos 3 a 7 existen como marcadores navegables para poder
-probar el cascarón de administración completo.
+`/ventas` y `/pedidos` siguen siendo marcadores navegables.
 
 ## Comandos
 
@@ -52,4 +51,9 @@ probar el cascarón de administración completo.
 npm run dev     # desarrollo
 npm run build   # compilar
 npm run lint    # revisar
+npm test        # pruebas de la lógica (node:test, sin dependencias)
 ```
+
+**No compiles con el servidor de desarrollo encendido**: los dos escriben en
+`.next` y se pisan, y el sitio empieza a devolver 500 con errores de
+`_buildManifest`. `npm run lint` y `npx tsc --noEmit` sí son seguros.

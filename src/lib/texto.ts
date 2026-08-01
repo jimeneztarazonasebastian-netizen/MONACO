@@ -80,6 +80,35 @@ export function aTexto(valor: FormDataEntryValue | null | undefined): string {
   return String(valor ?? "").trim();
 }
 
+/**
+ * Orden natural de tallas.
+ *
+ * Alfabéticamente S, M, L salen como L, M, S, que en una tienda de ropa
+ * se lee como un error. Las que no estén en la escala (tallas numéricas
+ * de pantalón, "Única") van después, las numéricas por valor y el resto
+ * alfabéticas.
+ */
+const ESCALA = ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"];
+
+export function compararTallas(a: string, b: string): number {
+  const ia = ESCALA.indexOf(a.trim().toUpperCase());
+  const ib = ESCALA.indexOf(b.trim().toUpperCase());
+
+  if (ia !== -1 && ib !== -1) return ia - ib;
+  if (ia !== -1) return -1;
+  if (ib !== -1) return 1;
+
+  const na = Number(a);
+  const nb = Number(b);
+  if (Number.isFinite(na) && Number.isFinite(nb)) return na - nb;
+
+  return a.localeCompare(b, "es");
+}
+
+export function ordenarTallas(tallas: string[]): string[] {
+  return [...tallas].sort(compararTallas);
+}
+
 /** plural(1, "variante", "variantes") → "1 variante" */
 export function plural(cantidad: number, singular: string, plural: string): string {
   return `${cantidad} ${cantidad === 1 ? singular : plural}`;

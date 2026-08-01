@@ -1,25 +1,47 @@
 import Link from "next/link";
 
+import {
+  TarjetaPrenda,
+  type PrendaCatalogo,
+} from "@/components/tienda/TarjetaPrenda";
 import { Monograma } from "@/components/ui/Logotipo";
+import { crearClienteServidor } from "@/lib/supabase/server";
 
-export default function PaginaInicio() {
+export default async function PaginaInicio() {
+  const supabase = await crearClienteServidor();
+
+  const { data: destacadas } = await supabase
+    .from("v_catalog")
+    .select("id, name, slug, images, price_from, price_varies, total_stock, sizes")
+    .eq("is_featured", true)
+    .limit(8);
+
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center px-6 text-center">
-      <Monograma className="mb-8 h-16 w-16 text-blanco" />
+    <>
+      <section className="border-b border-humo px-5 py-24 text-center sm:py-32">
+        <Monograma className="mx-auto mb-8 h-16 w-16 text-blanco" />
+        <h1 className="fuente-display mb-5 text-3xl sm:text-5xl">Mónaco</h1>
+        <p className="mx-auto mb-10 max-w-md leading-relaxed text-gris">
+          Ropa deportiva para entrenar en serio. Bucaramanga.
+        </p>
+        <Link
+          href="/catalogo"
+          className="bisel-sm inline-flex h-14 items-center bg-rojo px-10 text-xs font-semibold tracking-[0.2em] text-blanco uppercase transition-opacity hover:opacity-90"
+        >
+          Ver el catálogo
+        </Link>
+      </section>
 
-      <h1 className="fuente-display mb-4 text-3xl sm:text-5xl">Mónaco</h1>
-      <p className="mb-12 max-w-md leading-relaxed text-gris">
-        Ropa deportiva. Bucaramanga.
-        <br />
-        La tienda en línea está en construcción.
-      </p>
-
-      <Link
-        href="/login"
-        className="bisel-sm border border-humo px-8 py-4 text-xs tracking-[0.2em] text-gris uppercase transition-colors hover:border-gris hover:text-blanco"
-      >
-        Entrar a la caja
-      </Link>
-    </main>
+      {destacadas && destacadas.length > 0 ? (
+        <section className="mx-auto max-w-6xl px-5 py-16">
+          <h2 className="fuente-display mb-8 text-lg">Destacados</h2>
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            {destacadas.map((p) => (
+              <TarjetaPrenda key={p.id} prenda={p as PrendaCatalogo} />
+            ))}
+          </div>
+        </section>
+      ) : null}
+    </>
   );
 }
