@@ -53,6 +53,46 @@
   transform: skewX(35deg);
 }
 
+/* Barrido diagonal al pasar el mouse sobre una prenda: el mismo ángulo
+   del monograma, cruzando la foto. Es el único movimiento del catálogo,
+   y se apaga con prefers-reduced-motion como todo lo demás. */
+@utility barrido {
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -50% -120%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgb(255 255 255 / 0.14) 50%,
+      transparent 100%
+    );
+    transform: translateX(-100%) skewX(-35deg);
+    transition: transform 0.7s ease;
+    pointer-events: none;
+  }
+}
+
+@utility barrido-activo {
+  &::after {
+    transform: translateX(100%) skewX(-35deg);
+  }
+}
+
+/* Marca de agua para las prendas sin foto: mejor un monograma tenue
+   que un cartel diciendo que falta algo. */
+@utility sin-foto {
+  background-color: var(--color-carbon);
+  background-image: radial-gradient(
+    circle at 50% 45%,
+    var(--color-humo) 0%,
+    var(--color-carbon) 70%
+  );
+}
+
 :root {
   color-scheme: dark;
 }

@@ -38,7 +38,7 @@ export default async function PaginaCatalogo({
   let consulta = supabase
     .from("v_catalog")
     .select(
-      "id, name, slug, images, price_from, price_varies, total_stock, sizes, category_id",
+      "id, name, slug, images, price_from, price_to, price_varies, total_stock, sizes, colors, category_id",
     );
 
   if (categoriaElegida) consulta = consulta.eq("category_id", categoriaElegida.id);
