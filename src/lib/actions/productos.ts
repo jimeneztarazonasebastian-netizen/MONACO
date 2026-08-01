@@ -154,7 +154,7 @@ export async function crearProducto(
     .from("products")
     .insert({
       name: nombre,
-      slug: aSlug(nombre) || `producto-${Date.now()}`,
+      slug: aSlug(nombre),
       description: aTexto(formData.get("descripcion")) || null,
       category_id: categoriaId,
       is_featured: formData.get("destacado") === "on",
@@ -200,7 +200,13 @@ export async function actualizarProducto(
     })
     .eq("id", id);
 
-  if (error) return { error: `No se pudo guardar: ${error.message}` };
+  if (error) {
+    // Renombrar hacia un nombre ya usado choca contra el slug único.
+    if (error.code === "23505") {
+      return { error: "Ya existe otra prenda con ese nombre." };
+    }
+    return { error: `No se pudo guardar: ${error.message}` };
+  }
 
   revalidatePath("/productos");
   revalidatePath(`/productos/${id}`);

@@ -10,15 +10,30 @@
  */
 const TILDES_SUELTAS = new RegExp("[\\u0300-\\u036f]", "g");
 
+/** Huella corta y estable de un texto, para desempatar slugs vacíos. */
+function huella(texto: string): string {
+  let h = 0;
+  for (let i = 0; i < texto.length; i++) {
+    h = (h * 31 + texto.charCodeAt(i)) >>> 0;
+  }
+  return h.toString(36);
+}
+
 /** "Camiseta Térmica Negra" → "camiseta-termica-negra" */
 export function aSlug(texto: string): string {
-  return texto
+  const limpio = texto
     .normalize("NFD")
     .replace(TILDES_SUELTAS, "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 60);
+
+  // Un nombre de puros símbolos ("###") dejaría el slug en blanco, y como
+  // la columna es única, el segundo producto así chocaría con el primero
+  // con un error que no le dice nada a nadie. Se cae a una huella del
+  // texto original: distinta para textos distintos, igual para el mismo.
+  return limpio || `prenda-${huella(texto)}`;
 }
 
 /**
