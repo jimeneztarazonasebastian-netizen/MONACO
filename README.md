@@ -40,10 +40,10 @@ cerradas.
 | 3 | CRUD de productos y variantes | Hecho |
 | 4 | POS: caja, lector, pago, tirilla, turno | Hecho |
 | 5 | Catálogo público, filtros y carrito | Hecho |
-| 6 | Checkout a WhatsApp y bandeja de pedidos | Pendiente |
+| 6 | Checkout a WhatsApp y bandeja de pedidos | Hecho |
 | 7 | Reportes | Pendiente |
 
-`/ventas` y `/pedidos` siguen siendo marcadores navegables.
+`/ventas` (historial y reimpresión) sigue siendo un marcador.
 
 ## Comandos
 

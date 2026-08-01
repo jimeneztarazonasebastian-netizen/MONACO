@@ -19,6 +19,11 @@ type EstadoCarrito = {
   cambiarCantidad: (variantId: string, cantidad: number) => void;
   quitar: (variantId: string) => void;
   vaciar: () => void;
+  /** Reconcilia el carrito guardado contra lo que hay hoy en la tienda. */
+  sincronizar: (estado: Record<string, { precio: number; stock: number } | null>) => {
+    retiradas: string[];
+    ajustadas: string[];
+  };
 };
 
 /**
@@ -72,6 +77,34 @@ export const usarCarrito = create<EstadoCarrito>()(
         set({ lineas: get().lineas.filter((l) => l.variantId !== variantId) }),
 
       vaciar: () => set({ lineas: [] }),
+
+      sincronizar: (estado) => {
+        const retiradas: string[] = [];
+        const ajustadas: string[] = [];
+
+        const lineas = get()
+          .lineas.map((l) => {
+            const actual = estado[l.variantId];
+            const nombre = `${l.productName} ${l.size}`;
+
+            // Desapareció del catálogo o se quedó sin una sola unidad.
+            if (!actual || actual.stock <= 0) {
+              retiradas.push(nombre);
+              return null;
+            }
+
+            const cantidad = Math.min(l.cantidad, actual.stock);
+            if (cantidad !== l.cantidad || actual.precio !== l.precio) {
+              ajustadas.push(nombre);
+            }
+
+            return { ...l, precio: actual.precio, stock: actual.stock, cantidad };
+          })
+          .filter((l): l is NonNullable<typeof l> => l !== null);
+
+        set({ lineas });
+        return { retiradas, ajustadas };
+      },
     }),
     { name: "monaco-carrito" },
   ),
