@@ -1,6 +1,8 @@
 import Link from "next/link";
 
 import { CabeceraTienda } from "@/components/tienda/CabeceraTienda";
+import { CursorMonaco } from "@/components/tienda/CursorMonaco";
+import { RevelarAlEntrar } from "@/components/tienda/RevelarAlEntrar";
 import { Monograma } from "@/components/ui/Logotipo";
 import { crearClienteServidor } from "@/lib/supabase/server";
 import { supabaseConfigurado } from "@/lib/supabase/config";
@@ -56,9 +58,21 @@ export default async function LayoutTienda({
 
   return (
     <div className="flex min-h-dvh flex-col">
+      {/* El telón corre una sola vez por carga: este layout no se vuelve
+          a montar al navegar entre catálogo, prenda y carrito, así que
+          moverse por la tienda no lo repite. */}
+      <div className="telon" aria-hidden="true">
+        <span className="telon-marca">
+          <Monograma className="h-12 w-12 text-blanco" />
+        </span>
+      </div>
+
+      <CursorMonaco />
+      <RevelarAlEntrar />
+
       <CabeceraTienda categorias={categorias} />
 
-      <main className="flex-1">{children}</main>
+      <main className="entra flex-1">{children}</main>
 
       <footer className="mt-20 border-t border-humo px-5 py-10">
         <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-8 text-xs text-gris">

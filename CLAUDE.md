@@ -278,6 +278,29 @@ Cosas que se decidieron trabajando y que no se deducen leyendo el código:
   `PUBLIC` en toda función nueva y `anon` hereda de ahí: revocarle a `anon`
   directamente no quita nada.
 
+- **Las fuentes van en `@theme inline`, no en `@theme`.** Con `@theme` a
+  secas, Tailwind v4 no emitía `--font-display`, `--font-sans` ni
+  `--font-mono` como propiedades CSS reales, así que
+  `font-family: var(--font-sans)` quedaba inválido y **todo el sitio corría
+  con la fuente del sistema**: Archivo, Manrope e IBM Plex Mono se
+  descargaban en cada visita sin usarse, y la tirilla térmica salía en
+  proporcional en vez de monoespaciada. Los `--color-*` sí se emitían, y por
+  eso el fallo pasó desapercibido: los colores estaban bien y sólo la
+  tipografía se veía genérica, sin ningún error. Las reglas escritas a mano
+  apuntan ahora directamente a `--fuente-*`, que es lo que inyecta
+  `next/font` en el `<body>`.
+- **El movimiento vive sólo en `(tienda)`.** Telón de entrada, cursor propio
+  y aparición al hacer scroll se montan en el layout del catálogo; el POS
+  sigue sin una sola animación, como pide la sección 8. Dos reglas al tocar
+  esto: lo que esconde contenido se activa con un `data-` que pone el script
+  (sin JavaScript todo se ve, sólo que quieto), y el cursor propio se apaga
+  si el puntero no es fino, porque la mayoría del tráfico llega de
+  Instagram por celular.
+- **El revelado al hacer scroll observa mutaciones del DOM.** Los filtros
+  del catálogo reemplazan la rejilla entera sin recargar; si sólo se
+  observara una vez, las tarjetas que llegan después nacerían escondidas y
+  el filtro parecería no devolver resultados.
+
 **Trampas del entorno (Windows)**
 
 - **No compilar con el servidor de desarrollo encendido**: los dos escriben en

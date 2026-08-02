@@ -30,7 +30,7 @@ export function TarjetaPrenda({ prenda }: { prenda: PrendaCatalogo }) {
   return (
     <Link
       href={`/catalogo/${prenda.slug}`}
-      className="bisel group block h-full border border-humo bg-carbon transition-colors hover:border-gris focus-visible:border-gris"
+      className="bisel revelar group block h-full border border-humo bg-carbon transition-colors hover:border-gris focus-visible:border-gris"
     >
       <div className="barrido group-hover:barrido-activo relative aspect-4/5 overflow-hidden">
         {foto ? (
@@ -74,7 +74,9 @@ export function TarjetaPrenda({ prenda }: { prenda: PrendaCatalogo }) {
       </div>
 
       <div className="p-4">
-        <h3 className="mb-2 truncate text-sm text-blanco">{prenda.name}</h3>
+        <h3 className="fuente-display-compacta mb-2 truncate text-xs text-blanco">
+          {prenda.name}
+        </h3>
 
         <p className="font-mono text-base text-blanco">
           {prenda.price_varies ? (
