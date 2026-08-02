@@ -208,25 +208,140 @@ Nada de esto se implementa ahora, pero la base ya está puesta y no debe elimina
 
 ---
 
-## 11. Estado actual y orden de trabajo
+## 11. Estado actual
 
-Hecho: esquema de base de datos completo, aplicado en Supabase.
+Actualizado el 2026-08-02. **Los siete pasos del plan original están
+construidos, probados y publicados.**
 
-Pendiente, en este orden:
+**Dónde vive**
 
-1. Proyecto Next.js, conexión a Supabase, tipos generados.
-2. Auth, middleware de sesión, layout de administración. Sin esto no se puede probar nada del POS.
-3. CRUD de productos y variantes con carga de imágenes a Storage.
-4. POS completo: caja, lector, pago, tirilla, apertura y cierre de turno. Es el módulo que se usa desde el primer día.
-5. Catálogo público, filtros y carrito.
-6. Checkout a WhatsApp y bandeja de pedidos.
-7. Reportes: cierre diario, stock bajo, márgenes.
+| | |
+|---|---|
+| Código | `C:\Users\Isabel\Desktop\MONACO` |
+| Repositorio | `jimeneztarazonasebastian-netizen/MONACO`, rama `main` |
+| Supabase | proyecto `ygtlkxwlbxahpqcztxcm` (cuenta del emprendimiento, **no** la personal) |
+| Publicado | https://monaco-mauve.vercel.app — redespliega en cada push |
+
+Las llaves están en `.env.local` (fuera del repositorio) y en las variables de
+entorno de Vercel. La `service_role` no se usa en ningún lado y no debe
+aparecer en el código.
+
+**Módulos terminados**
+
+Autenticación con doble cerradura · CRUD de productos, variantes y categorías
+con fotos a Storage · POS con lector de código de barras, pago mixto y tirilla
+de 58 mm · turnos de caja con arqueo y movimientos de efectivo · inventario con
+stock bajo, cola de etiquetas y kardex · historial de ventas con reimpresión,
+anulación y devoluciones parciales · catálogo público con filtros, carrito y
+checkout por WhatsApp · bandeja de pedidos web · reportes de cierre, métodos,
+márgenes y lo más vendido · configuración de la tienda.
+
+**Migraciones aplicadas**, en `supabase/migrations/`:
+
+`0001` esquema base · `0002` códigos de barras, turnos, precios por variante ·
+`0003` cierra permisos que quedaron abiertos · `0004` bucket de imágenes ·
+`0005` correcciones del POS · `0006` etiquetas de prendas archivadas ·
+`0007` reportes · `0008` anulaciones, devoluciones y caja · `0009` anular con
+devoluciones previas · `0010` eslogan · `0011` ocultar costos al público.
 
 ---
 
-## 12. Lo que falta pedirle al dueño
+## 12. Decisiones que no están en ningún otro archivo
 
-- Número de WhatsApp de la tienda, dirección y horario para `store_settings`.
-- Entre 5 y 10 productos reales con fotos, tallas, colores, costo y precio de venta, para trabajar con datos verdaderos y no con inventos.
+Cosas que se decidieron trabajando y que no se deducen leyendo el código:
+
+- **La migración `0001` es una reconstrucción**, no la original: esa se perdió.
+  Se reescribió desde la sección 3 de este documento. Si aparece la original,
+  compararlas antes de reemplazar nada.
+- **Los movimientos de plata son hechos y no se borran.** Si entró al cajón,
+  entró; si se devolvió, sale como salida explícita enlazada a su venta.
+  Anular una venta no reescribe la historia del efectivo. Este modelo salió de
+  corregir un fallo donde el reintegro se contaba dos veces y el efectivo
+  esperado se iba a negativo.
+- **El stock inicial de una variante entra por `adjust_stock`**, no escrito en
+  la fila. La variante nace en cero. Si se escribiera directo, el kardex
+  arrancaría sin un movimiento que explique de dónde salieron las prendas.
+- **El carrito web se revisa contra la tienda al abrirlo.** Vive en
+  localStorage y puede tener días; si una prenda se archivó o se agotó, se
+  quita y se le dice al cliente cuál, en vez de reventar al confirmar.
+- **El enlace de WhatsApp es un ancla que el cliente pulsa**, no un
+  `window.open` desde una respuesta asíncrona: los bloqueadores se comen lo
+  segundo y quedaría un pedido registrado que nadie mandó.
+- **La ciudad es Barrancabermeja.** Este documento decía Bucaramanga y estaba
+  mal.
+- **El eslogan vive en `store_settings`**, como el resto de la identidad.
+- **RLS filtra filas, no columnas.** Darle a `anon` una política de lectura
+  sobre una tabla le da la fila entera, costos incluidos. Los permisos por
+  columna son otra capa (`grant select (columnas)`). Al agregar una columna
+  sensible a una tabla que el público lee, revisar el grant.
+- **Revocar permisos a `PUBLIC`, no a `anon`.** PostgreSQL concede `EXECUTE` a
+  `PUBLIC` en toda función nueva y `anon` hereda de ahí: revocarle a `anon`
+  directamente no quita nada.
+
+**Trampas del entorno (Windows)**
+
+- **No compilar con el servidor de desarrollo encendido**: los dos escriben en
+  `.next` y se pisan; el sitio empieza a devolver 500 con errores de
+  `_buildManifest`. `npm run lint` y `npx tsc --noEmit` sí son seguros.
+- Al detener el servidor, el proceso `node.exe` puede sobrevivir y quedarse con
+  el puerto 3000. El servidor nuevo arranca en el 3001 y lo que se prueba en el
+  3000 es el proceso viejo. **Comprobar en el log en qué puerto arrancó**, y
+  limpiar con `Get-CimInstance Win32_Process | Where CommandLine -like '*MONACO*' | Stop-Process -Force`.
+- Verificar por **código de salida**, no por el texto de la consola: encadenar
+  con `&&` después de un `grep` deja pasar un build roto.
+
+---
+
+## 13. Lo que falta
+
+**Antes de recibir clientes de verdad**
+
+1. **Fotos reales de las prendas.** Es lo de mayor impacto que queda: las
+   tarjetas del catálogo viven de la imagen y hoy muestran un marcador.
+2. **Probar la tirilla en la impresora térmica**, con márgenes en cero y sin
+   encabezado ni pie del navegador.
+3. **Probar la pistola física**: la lógica se validó con pulsaciones simuladas.
+4. **Borrar los datos de prueba** (ver abajo) y cargar el inventario real.
+
+**Mejoras conocidas, ninguna bloquea vender**
+
+- **Realtime**: el catálogo no actualiza el stock solo, hay que recargar. La
+  sección 7 lo pide y quedó sin hacer.
+- **`generate_sku` puede repetir SKU**: termina en cuatro dígitos de `random()`
+  sin reintento y la columna es única. Con volumen, un insert masivo choca. La
+  solución es una secuencia, como ya se hace con el código de barras.
+- **Las políticas RLS no se han probado con un cajero real.** Se probaron
+  simulando un usuario autenticado sin rol de dueño, no con una segunda cuenta.
+- **Solo existe un usuario**, el dueño. No se ha creado ningún cajero.
+
+**Lo que falta pedirle al dueño**
+
+- Fotos de las prendas.
+- El logo en SVG (hoy el monograma de la tirilla y del sitio está dibujado a
+  mano en código, como marcador).
 - Confirmar si las prendas del primer lote traen código de barras de fábrica.
-- El logo en SVG (hoy solo hay PNG) para que escale limpio en la tirilla y en el header.
+
+---
+
+## 14. Datos de prueba que hay hoy en la base
+
+Para que nadie los confunda con inventario real:
+
+- **5 prendas ficticias** — Camiseta Dry Fit, Pantaloneta Running, Licra
+  Cintura Alta, Top Deportivo, Gorra Entreno — con 25 variantes, sin fotos. Las
+  tallas S tienen 2 unidades a propósito, para ver el aviso de stock bajo.
+- **La venta `MN-000008`**, dejada a propósito para poder ver la tirilla desde
+  Ventas sin registrar una nueva.
+- **"Camiseta de colombia"**, archivada, con su foto. Esa la creó el dueño
+  probando y tiene 20 unidades.
+- Tres categorías reales: Hombre, Mujer, Accesorios.
+
+Para limpiar todo lo ficticio de un golpe:
+
+```sql
+delete from sales where number = 'MN-000008';
+delete from products where slug in (
+  'camiseta-dry-fit', 'pantaloneta-running',
+  'licra-cintura-alta', 'top-deportivo', 'gorra-entreno'
+);
+```
