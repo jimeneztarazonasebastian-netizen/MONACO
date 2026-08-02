@@ -301,7 +301,8 @@ Cosas que se decidieron trabajando y que no se deducen leyendo el código:
 2. **Probar la tirilla en la impresora térmica**, con márgenes en cero y sin
    encabezado ni pie del navegador.
 3. **Probar la pistola física**: la lógica se validó con pulsaciones simuladas.
-4. **Borrar los datos de prueba** (ver abajo) y cargar el inventario real.
+4. **Cargar el inventario real.** Los datos de prueba ya se borraron el
+   2026-08-02 (sección 14); queda vaciar lo que sobra y cargar mercancía.
 
 **Mejoras conocidas, ninguna bloquea vender**
 
@@ -310,8 +311,19 @@ Cosas que se decidieron trabajando y que no se deducen leyendo el código:
 - **`generate_sku` puede repetir SKU**: termina en cuatro dígitos de `random()`
   sin reintento y la columna es única. Con volumen, un insert masivo choca. La
   solución es una secuencia, como ya se hace con el código de barras.
-- **Las políticas RLS no se han probado con un cajero real.** Se probaron
-  simulando un usuario autenticado sin rol de dueño, no con una segunda cuenta.
+- **Las políticas RLS no se han probado con un cajero real.** El 2026-08-02 se
+  auditaron contra la base y el resultado es bueno: `anon` no tiene ni una sola
+  política de escritura, es `NOLOGIN` y no tiene `bypassrls`; no puede leer
+  `cost_price` (falla con *permission denied*, la 0011 aguanta); y todas las
+  funciones de admin (`adjust_stock`, `set_product_price`, `set_price_by_size`,
+  `void_sale`, `return_sale_items`, `confirm_web_order`) validan `is_admin()`
+  **dentro** de la función, que es lo que importa porque son `SECURITY DEFINER`
+  y por definición ignoran RLS. Lo que sigue sin probarse es el flujo completo
+  con una segunda cuenta de verdad.
+- **`customers` deja al staff editar cualquier cliente**: las políticas
+  `staff registra clientes` y `staff corrige clientes` son `true`/`true`. Es
+  coherente con la regla 5 de la sección 4, pero significa que un cajero puede
+  modificar los datos de cualquier cliente, no solo los que él registró.
 - **Solo existe un usuario**, el dueño. No se ha creado ningún cajero.
 
 **Lo que falta pedirle al dueño**
@@ -323,25 +335,44 @@ Cosas que se decidieron trabajando y que no se deducen leyendo el código:
 
 ---
 
-## 14. Datos de prueba que hay hoy en la base
+## 14. Qué hay hoy en la base
 
-Para que nadie los confunda con inventario real:
+Actualizado el 2026-08-02, **después de borrar los datos de prueba**. Las 5
+prendas ficticias (con sus 25 variantes) y la venta `MN-000008` ya no existen.
 
-- **5 prendas ficticias** — Camiseta Dry Fit, Pantaloneta Running, Licra
-  Cintura Alta, Top Deportivo, Gorra Entreno — con 25 variantes, sin fotos. Las
-  tallas S tienen 2 unidades a propósito, para ver el aviso de stock bajo.
-- **La venta `MN-000008`**, dejada a propósito para poder ver la tirilla desde
-  Ventas sin registrar una nueva.
-- **"Camiseta de colombia"**, archivada, con su foto. Esa la creó el dueño
-  probando y tiene 20 unidades.
-- Tres categorías reales: Hombre, Mujer, Accesorios.
+Lo que queda, todo a propósito:
 
-Para limpiar todo lo ficticio de un golpe:
+- **"Camiseta de colombia"**, archivada, con su foto y 20 unidades. La creó el
+  dueño probando. Es la única prenda con foto real y el único stock respaldado
+  por un movimiento de entrada en el kardex.
+- **Tres categorías reales**: Hombre, Mujer, Accesorios.
+- **Un turno de caja abierto** desde el 2026-08-01 con base inicial $0. Es
+  residuo de las pruebas. Mientras siga abierto, cualquier venta entra en él.
+- Cero ventas, cero clientes, cero movimientos de caja.
+
+El catálogo público está vacío (`v_catalog` no devuelve filas, porque la única
+prenda está archivada). El sitio lo maneja bien: muestra "No hay prendas que
+coincidan con esos filtros" en vez de reventar.
+
+**Siguen en fase de pruebas y piensan vaciar todo otra vez antes de cargar
+inventario real.** Para dejar la base en cero de verdad, incluido lo de arriba:
 
 ```sql
-delete from sales where number = 'MN-000008';
-delete from products where slug in (
-  'camiseta-dry-fit', 'pantaloneta-running',
-  'licra-cintura-alta', 'top-deportivo', 'gorra-entreno'
-);
+delete from sales;                        -- arrastra items, pagos y devoluciones
+delete from products;                     -- arrastra variantes y su kardex
+delete from cash_movements;
+delete from cash_sessions;
+delete from customers;
+-- las categorías se conservan: son reales, no de prueba
 ```
+
+Ojo con el orden y con las llaves foráneas: `inventory_movements.sale_id` y
+`cash_movements.sale_id` son `ON DELETE SET NULL`, no cascada. Borrar una venta
+deja vivos sus movimientos, huérfanos y sin venta asociada. Eso es coherente con
+la sección 12 (los movimientos de plata son hechos), pero si lo que quieres es
+una base limpia hay que borrarlos aparte.
+
+**Al recargar inventario real, el stock inicial entra por `adjust_stock`**, no
+escrito en la fila. El seed de las prendas ficticias lo escribía directo y por
+eso tenían stock sin un solo movimiento de entrada que lo explicara. Repetir eso
+con mercancía real deja el kardex mintiendo desde el primer día.
