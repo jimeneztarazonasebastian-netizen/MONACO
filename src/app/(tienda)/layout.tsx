@@ -1,36 +1,58 @@
 import Link from "next/link";
 
 import { CabeceraTienda } from "@/components/tienda/CabeceraTienda";
+import { Monograma } from "@/components/ui/Logotipo";
 import { crearClienteServidor } from "@/lib/supabase/server";
 import { supabaseConfigurado } from "@/lib/supabase/config";
+
+/**
+ * Cuando la tienda todavía no tiene base de datos configurada, el
+ * catálogo entero se apaga con un aviso en vez de reventar.
+ *
+ * Sin esto, cada página pública intenta abrir el cliente de Supabase con
+ * la URL vacía y el visitante recibe un "Application error" de Next: una
+ * pantalla negra que no dice nada y que en un despliegue nuevo es lo
+ * primero que se ve.
+ */
+function TiendaApagada() {
+  return (
+    <main className="flex min-h-dvh flex-col items-center justify-center px-6 text-center">
+      <Monograma className="mb-8 h-14 w-14 text-humo" />
+      <h1 className="fuente-display mb-4 text-2xl">Volvemos pronto</h1>
+      <p className="mb-2 max-w-md leading-relaxed text-gris">
+        Estamos terminando de montar la tienda en línea.
+      </p>
+      <p className="text-xs tracking-[0.16em] text-gris uppercase">
+        Mónaco · Barrancabermeja
+      </p>
+    </main>
+  );
+}
 
 export default async function LayoutTienda({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  let categorias: { slug: string; name: string }[] = [];
-  let tienda: { whatsapp: string | null; address: string | null; schedule: string | null } | null =
-    null;
+  if (!supabaseConfigurado) return <TiendaApagada />;
 
-  if (supabaseConfigurado) {
-    const supabase = await crearClienteServidor();
-    const [{ data: cats }, { data: ajustes }] = await Promise.all([
-      supabase
-        .from("categories")
-        .select("slug, name")
-        .eq("is_active", true)
-        .is("parent_id", null)
-        .order("position")
-        .order("name"),
-      supabase
-        .from("store_settings")
-        .select("whatsapp, address, schedule")
-        .maybeSingle(),
-    ]);
-    categorias = cats ?? [];
-    tienda = ajustes;
-  }
+  const supabase = await crearClienteServidor();
+  const [{ data: cats }, { data: ajustes }] = await Promise.all([
+    supabase
+      .from("categories")
+      .select("slug, name")
+      .eq("is_active", true)
+      .is("parent_id", null)
+      .order("position")
+      .order("name"),
+    supabase
+      .from("store_settings")
+      .select("whatsapp, address, schedule")
+      .maybeSingle(),
+  ]);
+
+  const categorias = cats ?? [];
+  const tienda = ajustes;
 
   return (
     <div className="flex min-h-dvh flex-col">
