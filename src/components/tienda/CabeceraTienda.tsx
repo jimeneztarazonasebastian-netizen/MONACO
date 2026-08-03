@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { Logotipo } from "@/components/ui/Logotipo";
+import { LogoMonaco } from "@/components/ui/LogoMonaco";
 import { unidadesCarritoWeb, usarCarrito } from "@/store/carrito";
 import { useEffect, useState } from "react";
 
@@ -24,8 +24,8 @@ export function CabeceraTienda({
   return (
     <header className="sticky top-0 z-10 border-b border-humo bg-negro/95 backdrop-blur">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-5 py-4">
-        <Link href="/" aria-label="Inicio">
-          <Logotipo />
+        <Link href="/" aria-label="Inicio" className="shrink-0">
+          <LogoMonaco alto={56} prioridad />
         </Link>
 
         <nav aria-label="Categorías" className="flex flex-wrap items-center gap-1">

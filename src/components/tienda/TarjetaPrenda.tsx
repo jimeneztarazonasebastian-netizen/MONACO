@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { Monograma } from "@/components/ui/Logotipo";
+import { LogoMonaco } from "@/components/ui/LogoMonaco";
 import { pesos } from "@/lib/formato";
 import { primeraImagen } from "@/lib/imagenes";
 import { ordenarTallas } from "@/lib/texto";
@@ -43,7 +43,7 @@ export function TarjetaPrenda({ prenda }: { prenda: PrendaCatalogo }) {
           />
         ) : (
           <span className="sin-foto flex h-full items-center justify-center">
-            <Monograma className="h-10 w-10 text-humo" />
+            <LogoMonaco alto={120} className="h-auto w-24 opacity-35" />
           </span>
         )}
 

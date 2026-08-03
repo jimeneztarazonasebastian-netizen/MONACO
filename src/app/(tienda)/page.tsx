@@ -4,7 +4,7 @@ import {
   TarjetaPrenda,
   type PrendaCatalogo,
 } from "@/components/tienda/TarjetaPrenda";
-import { Monograma } from "@/components/ui/Logotipo";
+import { LogoMonaco } from "@/components/ui/LogoMonaco";
 import { crearClienteServidor } from "@/lib/supabase/server";
 
 const SELECCION =
@@ -66,10 +66,16 @@ export default async function PaginaInicio() {
           }}
         />
 
-        <div className="relative mx-auto max-w-4xl px-5 py-24 text-center sm:py-36">
-          <Monograma className="mx-auto mb-8 h-14 w-14 text-blanco" />
+        <div className="relative mx-auto max-w-4xl px-5 py-20 text-center sm:py-28">
+          {/* El logo ya trae la palabra MÓNACO con su propia tipografía.
+              El h1 va oculto a la vista para que los buscadores y los
+              lectores de pantalla tengan el título, sin repetir el
+              nombre en otra letra al lado de la marca. */}
+          <h1 className="sr-only">Mónaco, tienda de ropa deportiva</h1>
 
-          <h1 className="fuente-display mb-4 text-4xl sm:text-6xl">Mónaco</h1>
+          <div className="mb-8 flex justify-center">
+            <LogoMonaco alto={260} prioridad className="h-auto w-52 sm:w-64" />
+          </div>
 
           {tienda?.slogan ? (
             <p className="fuente-display mb-8 text-sm text-rojo sm:text-base">

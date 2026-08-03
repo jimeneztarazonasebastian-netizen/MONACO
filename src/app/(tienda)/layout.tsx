@@ -3,7 +3,7 @@ import Link from "next/link";
 import { CabeceraTienda } from "@/components/tienda/CabeceraTienda";
 import { CursorMonaco } from "@/components/tienda/CursorMonaco";
 import { RevelarAlEntrar } from "@/components/tienda/RevelarAlEntrar";
-import { Monograma } from "@/components/ui/Logotipo";
+import { LogoMonaco } from "@/components/ui/LogoMonaco";
 import { crearClienteServidor } from "@/lib/supabase/server";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 
@@ -19,7 +19,7 @@ import { supabaseConfigurado } from "@/lib/supabase/config";
 function TiendaApagada() {
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center px-6 text-center">
-      <Monograma className="mb-8 h-14 w-14 text-humo" />
+      <LogoMonaco alto={180} className="mb-6 h-auto w-40" />
       <h1 className="fuente-display mb-4 text-2xl">Volvemos pronto</h1>
       <p className="mb-2 max-w-md leading-relaxed text-gris">
         Estamos terminando de montar la tienda en línea.
@@ -63,7 +63,7 @@ export default async function LayoutTienda({
           moverse por la tienda no lo repite. */}
       <div className="telon" aria-hidden="true">
         <span className="telon-marca">
-          <Monograma className="h-12 w-12 text-blanco" />
+          <LogoMonaco alto={160} className="h-auto w-36" />
         </span>
       </div>
 
@@ -77,7 +77,7 @@ export default async function LayoutTienda({
       <footer className="mt-20 border-t border-humo px-5 py-10">
         <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-8 text-xs text-gris">
           <div>
-            <p className="fuente-display mb-3 text-blanco">Mónaco</p>
+            <LogoMonaco alto={72} className="mb-3" />
             <p>Ropa deportiva · Barrancabermeja</p>
           </div>
 

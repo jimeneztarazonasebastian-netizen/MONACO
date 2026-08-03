@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 
-import { Monograma } from "@/components/ui/Logotipo";
+import { LogoMonaco } from "@/components/ui/LogoMonaco";
 import { urlImagen } from "@/lib/imagenes";
 
 /**
@@ -37,7 +37,7 @@ export function GaleriaPrenda({
           />
         ) : (
           <span className="sin-foto flex h-full flex-col items-center justify-center gap-4">
-            <Monograma className="h-12 w-12 text-humo" />
+            <LogoMonaco alto={140} className="h-auto w-32 opacity-40" />
             <span className="text-xs tracking-[0.16em] text-gris uppercase">
               Foto en camino
             </span>

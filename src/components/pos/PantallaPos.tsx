@@ -51,7 +51,7 @@ export function PantallaPos({
     [agregar],
   );
 
-  // La pistola escribe en cualquier parte de la pantalla, así que se
+  // El lector escribe en cualquier parte de la pantalla, así que se
   // escucha en la ventana y no en un input concreto. Se apaga mientras
   // se cobra para que un escaneo accidental no meta prendas a una venta
   // que ya está cerrándose.
@@ -209,7 +209,7 @@ export function PantallaPos({
           type="search"
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
-          placeholder="Dispara la pistola o escribe el nombre de la prenda…"
+          placeholder="Escanea la prenda o escribe su nombre…"
           autoFocus
           className="h-16 w-full border border-humo bg-carbon px-4 text-lg text-blanco placeholder:text-gris focus:border-gris focus:outline-none"
         />
@@ -259,7 +259,7 @@ export function PantallaPos({
       <div className="flex flex-col gap-4 border-t border-humo pt-6 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6">
         {lineas.length === 0 ? (
           <p className="py-10 text-center text-sm text-gris">
-            Dispara la pistola sobre la prenda para empezar.
+            Escanea el código de la prenda para empezar.
           </p>
         ) : (
           <ul className="flex flex-col">

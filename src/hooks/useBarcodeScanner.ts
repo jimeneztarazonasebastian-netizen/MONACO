@@ -5,9 +5,9 @@ import { useCallback, useEffect, useRef } from "react";
 /**
  * Lector de código de barras sin librería.
  *
- * La pistola se comporta como un teclado: escribe los dígitos muy rápido
+ * El lector se comporta como un teclado: escribe los dígitos muy rápido
  * y manda Enter. Un humano tecleando nunca baja de unos 50 ms entre
- * teclas; la pistola va muy por debajo. Con ese umbral se distingue una
+ * teclas; el lector va muy por debajo. Con ese umbral se distingue una
  * cosa de la otra y se evita que lo que el cajero escribe a mano en el
  * buscador se interprete como un escaneo.
  *
@@ -15,7 +15,7 @@ import { useCallback, useEffect, useRef } from "react";
  * foco se haya ido a un botón o a un modal, que es lo que pasa siempre
  * en una caja de verdad.
  */
-const MS_ENTRE_TECLAS_PISTOLA = 30;
+const MS_ENTRE_TECLAS_LECTOR = 30;
 const LARGO_MINIMO = 6;
 
 export function useBarcodeScanner(
@@ -47,7 +47,7 @@ export function useBarcodeScanner(
     }
 
     // Una pausa larga significa que empieza una lectura nueva.
-    if (desdeLaUltima > MS_ENTRE_TECLAS_PISTOLA) {
+    if (desdeLaUltima > MS_ENTRE_TECLAS_LECTOR) {
       buffer.current = "";
     }
 

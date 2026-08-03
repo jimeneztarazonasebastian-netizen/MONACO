@@ -19,7 +19,7 @@ export type VarianteEncontrada = {
   images: string[];
 };
 
-/** Lo que dispara la pistola. Un solo resultado o ninguno. */
+/** Lo que devuelve el lector al escanear. Un solo resultado o ninguno. */
 export async function buscarPorCodigo(
   codigo: string,
 ): Promise<{ variante: VarianteEncontrada | null; error: string | null }> {

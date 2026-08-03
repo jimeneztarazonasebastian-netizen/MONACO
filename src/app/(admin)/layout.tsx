@@ -1,5 +1,5 @@
 import { NavAdmin } from "@/components/admin/NavAdmin";
-import { Logotipo } from "@/components/ui/Logotipo";
+import { LogoMonaco } from "@/components/ui/LogoMonaco";
 import { cerrarSesion } from "@/lib/actions/auth";
 import { exigirSesion } from "@/lib/sesion";
 
@@ -26,7 +26,7 @@ export default async function LayoutAdmin({
     <div className="flex min-h-dvh flex-col">
       <header className="border-b border-humo bg-carbon">
         <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-3">
-          <Logotipo />
+          <LogoMonaco alto={44} />
 
           <div className="flex items-center gap-4">
             <span className="text-right text-xs leading-tight">
