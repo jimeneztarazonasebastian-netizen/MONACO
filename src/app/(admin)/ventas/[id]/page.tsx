@@ -43,7 +43,7 @@ export default async function PaginaVenta({
       .maybeSingle(),
     supabase
       .from("store_settings")
-      .select("store_name, slogan, address, whatsapp, receipt_footer")
+      .select("slogan, address, whatsapp, receipt_footer")
       .maybeSingle(),
     supabase
       .from("sale_returns")
@@ -253,7 +253,6 @@ export default async function PaginaVenta({
         }}
         tienda={
           tienda ?? {
-            store_name: "Mónaco",
             slogan: null,
             address: null,
             whatsapp: null,

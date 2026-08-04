@@ -1,5 +1,6 @@
 "use client";
 
+import { LogoTinta } from "@/components/ui/LogoMonaco";
 import { fechaHora, pesos } from "@/lib/formato";
 import { normalizarNumero } from "@/lib/whatsapp";
 
@@ -20,8 +21,13 @@ export type LineaTirilla = {
   cantidad: number;
 };
 
+/**
+ * Lo que la tirilla saca de `store_settings`.
+ *
+ * `store_name` no está: el nombre lo pone el logo, que lo trae dibujado
+ * con su propia tipografía.
+ */
 export type DatosTienda = {
-  store_name: string;
   slogan: string | null;
   address: string | null;
   whatsapp: string | null;
@@ -114,33 +120,10 @@ export function Tirilla({
     <div id="tirilla" className="hidden print:block">
       {/* --- Marca --- */}
       <div style={{ textAlign: "center", marginBottom: "2mm" }}>
-        <svg
-          viewBox="0 0 40 40"
-          width="34"
-          height="34"
-          fill="none"
-          style={{ display: "block", margin: "0 auto 1.5mm" }}
-          aria-hidden="true"
-        >
-          <path
-            d="M5 33V7l15 18L35 7v26"
-            stroke="#000"
-            strokeWidth="3.5"
-            strokeLinecap="square"
-            strokeLinejoin="miter"
-          />
-        </svg>
-
-        <div
-          style={{
-            fontSize: "17px",
-            fontWeight: 700,
-            letterSpacing: "4px",
-            lineHeight: 1.1,
-          }}
-        >
-          {tienda.store_name.toUpperCase()}
-        </div>
+        {/* El lockup ya trae la palabra MÓNACO con su propia tipografía,
+            así que `store_name` no se imprime al lado: serían dos marcas
+            distintas pegadas. El eslogan sí, que no está en el logo. */}
+        <LogoTinta ancho={40} />
 
         {tienda.slogan ? (
           <div

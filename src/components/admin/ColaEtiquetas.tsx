@@ -3,6 +3,7 @@
 import JsBarcode from "jsbarcode";
 import { useEffect, useRef, useState } from "react";
 
+import { LogoTinta } from "@/components/ui/LogoMonaco";
 import { marcarEtiquetasImpresas } from "@/lib/actions/inventario";
 import { pesos } from "@/lib/formato";
 
@@ -50,11 +51,9 @@ function CodigoBarras({ codigo }: { codigo: string }) {
 
 export function ColaEtiquetas({
   pendientes,
-  nombreTienda,
   slogan,
 }: {
   pendientes: VariantePendiente[];
-  nombreTienda: string;
   slogan: string | null;
 }) {
   const [elegidas, setElegidas] = useState<Set<string>>(
@@ -170,29 +169,10 @@ export function ColaEtiquetas({
             }}
           >
             {/* La marca va arriba: la etiqueta viaja colgada de la
-                prenda y a veces es lo único que el cliente conserva. */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "1.5mm",
-                marginBottom: "0.5mm",
-              }}
-            >
-              <svg viewBox="0 0 40 40" width="11" height="11" fill="none" aria-hidden="true">
-                <path
-                  d="M5 33V7l15 18L35 7v26"
-                  stroke="#000"
-                  strokeWidth="4"
-                  strokeLinecap="square"
-                  strokeLinejoin="miter"
-                />
-              </svg>
-              <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "2.5px" }}>
-                {nombreTienda.toUpperCase()}
-              </span>
-            </div>
+                prenda y a veces es lo único que el cliente conserva.
+                Como en la tirilla, el logo ya trae el nombre y no se
+                repite al lado. */}
+            <LogoTinta ancho={26} />
 
             {slogan ? (
               <div style={{ fontSize: "7px", letterSpacing: "1.5px", textTransform: "uppercase" }}>

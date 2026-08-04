@@ -54,7 +54,7 @@ export default async function PaginaInventario({
     vista === "etiquetas"
       ? await supabase
           .from("store_settings")
-          .select("store_name, slogan")
+          .select("slogan")
           .maybeSingle()
       : { data: null };
 
@@ -142,7 +142,6 @@ export default async function PaginaInventario({
       {vista === "etiquetas" ? (
         <ColaEtiquetas
           pendientes={(etiquetas ?? []) as VariantePendiente[]}
-          nombreTienda={tienda?.store_name ?? "Mónaco"}
           slogan={tienda?.slogan ?? null}
         />
       ) : null}

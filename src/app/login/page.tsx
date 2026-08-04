@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { FormularioLogin } from "@/components/ui/FormularioLogin";
-import { Logotipo } from "@/components/ui/Logotipo";
+import { LogoMonaco } from "@/components/ui/LogoMonaco";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 
 export const metadata: Metadata = {
@@ -23,7 +23,7 @@ export default async function PaginaLogin({
     <main className="flex min-h-dvh items-center justify-center px-6 py-16">
       <div className="w-full max-w-sm">
         <div className="mb-12 flex justify-center">
-          <Logotipo />
+          <LogoMonaco alto={150} className="h-auto w-36" />
         </div>
 
         {!supabaseConfigurado ? (

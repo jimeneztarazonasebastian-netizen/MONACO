@@ -269,15 +269,40 @@ Cosas que se decidieron trabajando y que no se deducen leyendo el código:
   segundo y quedaría un pedido registrado que nadie mandó.
 - **La ciudad es Barrancabermeja.** Este documento decía Bucaramanga y estaba
   mal.
-- **El logo es el archivo del dueño, no se redibuja.** Vive en
-  `public/logo-monaco.jpeg` y se usa con el componente `LogoMonaco`. Es un
-  lockup completo: monograma, la palabra MÓNACO con su propia tipografía,
-  "tienda de ropa deportiva" y "since 2026". **No se recorta, no se redibuja y
-  no se le cambia la letra** — solo se escala. Si hace falta otra versión
-  (horizontal, fondo claro, para la térmica), se le pide al dueño. Antes había
-  un monograma dibujado a mano en SVG (`Logotipo.tsx`) que era un marcador;
-  sigue existiendo pero **solo lo usan la tirilla y las etiquetas**, por la
-  razón que explica la sección 13.
+- **El logo es el archivo del dueño, no se redibuja.** Es un lockup completo:
+  monograma, la palabra MÓNACO con su propia tipografía, "tienda de ropa
+  deportiva" y "since 2026". **No se recorta, no se redibuja y no se le cambia
+  la letra** — solo se escala. Si hace falta otra versión, se le pide a él.
+  **Hay dos tintas y las dos las entregó el dueño**; ninguna se generó
+  invirtiendo la otra:
+  - `public/logo-monaco.png` — trazo **blanco** sobre transparente, para
+    pantalla. Componente `LogoMonaco`.
+  - `public/logo-monaco-tinta.png` — trazo **negro** sobre transparente, para
+    la impresora térmica. Componente `LogoTinta`.
+
+  Ya no queda ningún monograma dibujado a mano: `Logotipo.tsx` se borró y el
+  login usa el logo real como el resto del sitio.
+- **El JPEG del logo se cambió por PNG transparente porque dejaba un recuadro.**
+  El fondo del JPEG era negro puro `#000` y el del sitio es `--negro #0A0A0A`:
+  sobre el fondo general casi no se veía, pero `LogoMonaco` también sirve de
+  marcador dentro de las tarjetas de producto, que son `--carbon #171719`, y
+  ahí el cuadro negro saltaba a la vista.
+- **El lienzo del PNG de pantalla se dejó cuadrado a propósito.** El trazo solo
+  ocupa la banda central (proporción 1.8), pero recortarlo habría cambiado la
+  medida en los ocho sitios que llaman a `LogoMonaco`. El de la térmica sí va
+  recortado, y por eso: en un rollo de 58 mm el lienzo cuadrado desperdiciaba
+  casi dos centímetros de papel en blanco. Recortar **margen transparente** no
+  es recortar el arte; no se tocó un píxel del trazo.
+- **Lo que se imprime no lleva `store_name`.** El lockup ya trae la palabra
+  MÓNACO dibujada; ponerla otra vez al lado en texto eran dos marcas distintas
+  pegadas, el mismo problema que resolvió el `h1` `sr-only` de la portada. El
+  eslogan sí se imprime, porque no está en el logo y vive en `store_settings`.
+  Consecuencia a tener presente: **si el dueño cambia el nombre en
+  configuración, la tirilla seguirá diciendo MÓNACO**, porque viene de la
+  imagen. El día que eso importe, hay que pedirle un logo nuevo.
+- **Lo que se imprime usa `<img>` y no `next/image`.** El optimizador envuelve
+  la etiqueta en un `<span>` con carga diferida, y en una ventana de impresión
+  eso sale como una tirilla sin logo.
 - **En la portada el `h1` va `sr-only`.** El logo ya trae la palabra MÓNACO con
   su tipografía; repetirla al lado en Archivo era poner dos marcas distintas
   juntas. El título sigue ahí para buscadores y lectores de pantalla.
@@ -337,28 +362,19 @@ Cosas que se decidieron trabajando y que no se deducen leyendo el código:
 
 **Antes de recibir clientes de verdad**
 
-1. **El logo para la tirilla y las etiquetas.** Es lo único del logo que quedó
-   sin resolver, y hace falta una decisión del dueño. Hay dos archivos en
-   `Imagenes de catalogo/`:
-   - `Logo de monaco.jpeg` — blanco sobre negro. Es el que usa la web
-     (`public/logo-monaco.jpeg`).
-   - `Logo_de_monaco-removebg-preview.png` — el mismo trazo **blanco** con el
-     fondo quitado. Sirve para la web sobre fondos oscuros, pero **no para la
-     térmica**: imprime negro sobre papel blanco, así que un trazo blanco sale
-     invisible y un fondo negro sale como un rectángulo sólido.
-
-   Por eso la tirilla y las etiquetas siguen usando el monograma dibujado.
-   Salidas: pedirle al dueño una versión **negra sobre blanco**, o invertir el
-   archivo por código (`filter: invert(1)` al imprimir). Lo segundo es alterar
-   su arte y el dueño pidió expresamente no cambiar el logo, así que **no se
-   hace sin su permiso**.
-2. **Probar la tirilla en la impresora térmica**, con márgenes en cero y sin
-   encabezado ni pie del navegador.
-3. **Probar el lector físico**: la lógica se validó con pulsaciones simuladas.
-4. **Decidir qué pasa con el catálogo de prueba.** Las 5 prendas ficticias
-   existen otra vez y ya tienen foto (sección 14). Sirven para enseñar la
-   tienda, pero no son mercancía real: antes de vender hay que reemplazarlas
-   por el inventario de verdad o archivarlas.
+1. **Probar la tirilla en la impresora térmica**, con márgenes en cero y sin
+   encabezado ni pie del navegador. **Mirar de cerca el logo**: el lockup se
+   simuló a 203 dpi con umbral de un bit, que es como quema la térmica, y a los
+   40 mm de la tirilla el monograma y MÓNACO salen limpios, "tienda de ropa
+   deportiva" sale apretada pero legible y **"since 2026" sale emplastada**. En
+   las etiquetas, a 26 mm, la línea de "tienda de ropa deportiva" también se
+   degrada. Si en papel se ve mal, la salida es **pedirle al dueño el monograma
+   suelto**, no recortarle el lockup.
+2. **Probar el lector físico**: la lógica se validó con pulsaciones simuladas.
+3. **Decidir qué pasa con el catálogo de prueba.** Las 5 prendas ficticias
+   existen y ya tienen foto (sección 14). Sirven para enseñar la tienda, pero
+   no son mercancía real: antes de vender hay que reemplazarlas por el
+   inventario de verdad o archivarlas.
 
 **Mejoras conocidas, ninguna bloquea vender**
 
@@ -385,8 +401,11 @@ Cosas que se decidieron trabajando y que no se deducen leyendo el código:
 **Lo que falta pedirle al dueño**
 
 - Fotos de las prendas.
-- El logo en SVG (hoy el monograma de la tirilla y del sitio está dibujado a
-  mano en código, como marcador).
+- **El logo en SVG.** Ya no es urgente —hay PNG transparente en las dos tintas
+  y no queda nada dibujado a mano—, pero el archivo de la térmica tiene 640 px
+  de ancho y un vectorial imprimiría más nítido y pesaría menos.
+- **El monograma suelto, sin la palabra ni las líneas de texto**, por si la
+  microtipografía del lockup no aguanta la térmica (punto 1 de arriba).
 - Confirmar si las prendas del primer lote traen código de barras de fábrica.
 
 ---
@@ -394,9 +413,11 @@ Cosas que se decidieron trabajando y que no se deducen leyendo el código:
 ## 14. Qué hay hoy en la base
 
 Verificado contra la base el 2026-08-03. **Ojo: este apartado ya estuvo
-desactualizado una vez** — decía que las prendas de prueba se habían borrado
-cuando en realidad se habían vuelto a crear. Si vas a decidir algo con esto,
-consúltalo contra la base primero.
+desactualizado dos veces.** La primera decía que las prendas de prueba se
+habían borrado cuando se habían vuelto a crear. La segunda arrastró dos frases
+de esa versión vieja que ya no eran ciertas: que el catálogo público estaba
+vacío, y que solo una prenda tenía movimiento de entrada en el kardex. **Si vas
+a decidir algo con esto, consúltalo contra la base primero.**
 
 - **5 prendas activas, cada una con una foto real subida a Storage**: Camiseta
   Dry Fit (4 variantes), Pantaloneta Running (4), Licra Cintura Alta (8), Top
@@ -404,14 +425,20 @@ consúltalo contra la base primero.
   enseñar la tienda. Los originales de las fotos están en
   `Imagenes de catalogo/`.
 - **"Camiseta de colombia"**, archivada, con foto y 20 unidades. La creó el
-  dueño probando; es la única con un movimiento de entrada en el kardex.
+  dueño probando.
 - **Tres categorías reales**: Hombre, Mujer, Accesorios.
-- **Una venta** y **un turno de caja abierto** desde el 2026-08-01 con base $0.
-  Residuo de pruebas. Mientras el turno siga abierto, toda venta entra en él.
+- **Una venta**, `MN-000009`, de $139.800, y **un turno de caja abierto** desde
+  el 2026-08-01 con base $0. Residuo de pruebas. Mientras el turno siga
+  abierto, toda venta entra en él.
+- **Cero clientes y cero movimientos de caja.**
+- **25 etiquetas pendientes** de imprimir y **6 variantes en stock bajo**.
 
-El catálogo público está vacío (`v_catalog` no devuelve filas, porque la única
-prenda está archivada). El sitio lo maneja bien: muestra "No hay prendas que
-coincidan con esos filtros" en vez de reventar.
+**El catálogo público muestra las 5 prendas**: `v_catalog` devuelve 5 filas.
+
+**El kardex está completo y cuadra**: 26 movimientos de entrada por 181
+unidades —uno por variante, incluidas las de prueba— menos las 2 de la venta,
+igual a las 179 unidades que hay hoy en stock. Esta vez el stock de las prendas
+ficticias sí entró por `adjust_stock` y no escrito en la fila.
 
 **Siguen en fase de pruebas y piensan vaciar todo otra vez antes de cargar
 inventario real.** Para dejar la base en cero de verdad, incluido lo de arriba:
@@ -432,6 +459,7 @@ la sección 12 (los movimientos de plata son hechos), pero si lo que quieres es
 una base limpia hay que borrarlos aparte.
 
 **Al recargar inventario real, el stock inicial entra por `adjust_stock`**, no
-escrito en la fila. El seed de las prendas ficticias lo escribía directo y por
-eso tenían stock sin un solo movimiento de entrada que lo explicara. Repetir eso
-con mercancía real deja el kardex mintiendo desde el primer día.
+escrito en la fila. La primera versión del seed lo escribía directo y las
+prendas quedaban con stock sin un solo movimiento que lo explicara; el seed
+actual ya lo hace bien y por eso el kardex de hoy cuadra. Volver a escribirlo
+directo con mercancía real deja el kardex mintiendo desde el primer día.

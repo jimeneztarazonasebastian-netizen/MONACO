@@ -15,7 +15,7 @@ export default async function PaginaPos() {
     supabase.from("cash_sessions").select("id").is("closed_at", null).maybeSingle(),
     supabase
       .from("store_settings")
-      .select("store_name, slogan, address, whatsapp, receipt_footer")
+      .select("slogan, address, whatsapp, receipt_footer")
       .single(),
   ]);
 
@@ -44,7 +44,6 @@ export default async function PaginaPos() {
     <PantallaPos
       tienda={
         tienda ?? {
-          store_name: "Mónaco",
           slogan: null,
           address: null,
           whatsapp: null,
