@@ -269,6 +269,24 @@ Cosas que se decidieron trabajando y que no se deducen leyendo el código:
   segundo y quedaría un pedido registrado que nadie mandó.
 - **La ciudad es Barrancabermeja.** Este documento decía Bucaramanga y estaba
   mal.
+- **El logo es el archivo del dueño, no se redibuja.** Vive en
+  `public/logo-monaco.jpeg` y se usa con el componente `LogoMonaco`. Es un
+  lockup completo: monograma, la palabra MÓNACO con su propia tipografía,
+  "tienda de ropa deportiva" y "since 2026". **No se recorta, no se redibuja y
+  no se le cambia la letra** — solo se escala. Si hace falta otra versión
+  (horizontal, fondo claro, para la térmica), se le pide al dueño. Antes había
+  un monograma dibujado a mano en SVG (`Logotipo.tsx`) que era un marcador;
+  sigue existiendo pero **solo lo usan la tirilla y las etiquetas**, por la
+  razón que explica la sección 13.
+- **En la portada el `h1` va `sr-only`.** El logo ya trae la palabra MÓNACO con
+  su tipografía; repetirla al lado en Archivo era poner dos marcas distintas
+  juntas. El título sigue ahí para buscadores y lectores de pantalla.
+- **No se habla de "disparar" ni de "pistola".** En una tienda de ropa suena a
+  arma. Se dice **escanear** y **el lector**, en la interfaz y en el código.
+- **Las variables de Supabase se leen con `.trim()`.** Un espacio pegado por
+  error en el panel de Vercel no rompe el cliente —`new URL()` recorta espacios
+  por especificación— pero sí rompe `urlImagen()`, y el síntoma es que todas
+  las fotos aparecen rotas mientras la base parece estar bien.
 - **El eslogan vive en `store_settings`**, como el resto de la identidad.
 - **RLS filtra filas, no columnas.** Darle a `anon` una política de lectura
   sobre una tabla le da la fila entera, costos incluidos. Los permisos por
@@ -319,13 +337,28 @@ Cosas que se decidieron trabajando y que no se deducen leyendo el código:
 
 **Antes de recibir clientes de verdad**
 
-1. **Fotos reales de las prendas.** Es lo de mayor impacto que queda: las
-   tarjetas del catálogo viven de la imagen y hoy muestran un marcador.
+1. **El logo para la tirilla y las etiquetas.** Es lo único del logo que quedó
+   sin resolver, y hace falta una decisión del dueño. Hay dos archivos en
+   `Imagenes de catalogo/`:
+   - `Logo de monaco.jpeg` — blanco sobre negro. Es el que usa la web
+     (`public/logo-monaco.jpeg`).
+   - `Logo_de_monaco-removebg-preview.png` — el mismo trazo **blanco** con el
+     fondo quitado. Sirve para la web sobre fondos oscuros, pero **no para la
+     térmica**: imprime negro sobre papel blanco, así que un trazo blanco sale
+     invisible y un fondo negro sale como un rectángulo sólido.
+
+   Por eso la tirilla y las etiquetas siguen usando el monograma dibujado.
+   Salidas: pedirle al dueño una versión **negra sobre blanco**, o invertir el
+   archivo por código (`filter: invert(1)` al imprimir). Lo segundo es alterar
+   su arte y el dueño pidió expresamente no cambiar el logo, así que **no se
+   hace sin su permiso**.
 2. **Probar la tirilla en la impresora térmica**, con márgenes en cero y sin
    encabezado ni pie del navegador.
-3. **Probar la pistola física**: la lógica se validó con pulsaciones simuladas.
-4. **Cargar el inventario real.** Los datos de prueba ya se borraron el
-   2026-08-02 (sección 14); queda vaciar lo que sobra y cargar mercancía.
+3. **Probar el lector físico**: la lógica se validó con pulsaciones simuladas.
+4. **Decidir qué pasa con el catálogo de prueba.** Las 5 prendas ficticias
+   existen otra vez y ya tienen foto (sección 14). Sirven para enseñar la
+   tienda, pero no son mercancía real: antes de vender hay que reemplazarlas
+   por el inventario de verdad o archivarlas.
 
 **Mejoras conocidas, ninguna bloquea vender**
 
@@ -360,18 +393,21 @@ Cosas que se decidieron trabajando y que no se deducen leyendo el código:
 
 ## 14. Qué hay hoy en la base
 
-Actualizado el 2026-08-02, **después de borrar los datos de prueba**. Las 5
-prendas ficticias (con sus 25 variantes) y la venta `MN-000008` ya no existen.
+Verificado contra la base el 2026-08-03. **Ojo: este apartado ya estuvo
+desactualizado una vez** — decía que las prendas de prueba se habían borrado
+cuando en realidad se habían vuelto a crear. Si vas a decidir algo con esto,
+consúltalo contra la base primero.
 
-Lo que queda, todo a propósito:
-
-- **"Camiseta de colombia"**, archivada, con su foto y 20 unidades. La creó el
-  dueño probando. Es la única prenda con foto real y el único stock respaldado
-  por un movimiento de entrada en el kardex.
+- **5 prendas activas, cada una con una foto real subida a Storage**: Camiseta
+  Dry Fit (4 variantes), Pantaloneta Running (4), Licra Cintura Alta (8), Top
+  Deportivo (8) y Gorra Entreno (1). **Son inventadas**, se crearon para poder
+  enseñar la tienda. Los originales de las fotos están en
+  `Imagenes de catalogo/`.
+- **"Camiseta de colombia"**, archivada, con foto y 20 unidades. La creó el
+  dueño probando; es la única con un movimiento de entrada en el kardex.
 - **Tres categorías reales**: Hombre, Mujer, Accesorios.
-- **Un turno de caja abierto** desde el 2026-08-01 con base inicial $0. Es
-  residuo de las pruebas. Mientras siga abierto, cualquier venta entra en él.
-- Cero ventas, cero clientes, cero movimientos de caja.
+- **Una venta** y **un turno de caja abierto** desde el 2026-08-01 con base $0.
+  Residuo de pruebas. Mientras el turno siga abierto, toda venta entra en él.
 
 El catálogo público está vacío (`v_catalog` no devuelve filas, porque la única
 prenda está archivada). El sitio lo maneja bien: muestra "No hay prendas que
