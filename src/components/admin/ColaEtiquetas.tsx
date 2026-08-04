@@ -49,6 +49,62 @@ function CodigoBarras({ codigo }: { codigo: string }) {
   return <svg ref={ref} />;
 }
 
+/**
+ * Una etiqueta, con las medidas en milímetros que va a tener en papel.
+ *
+ * La usan la vista previa y el bloque que sale por la impresora, a
+ * propósito: si cada una tuviera su copia del diseño, la previa dejaría
+ * de parecerse a lo que imprime en cuanto alguien tocara una sola.
+ */
+function Etiqueta({
+  v,
+  slogan,
+}: {
+  v: VariantePendiente;
+  slogan: string | null;
+}) {
+  return (
+    <div
+      style={{
+        paddingBottom: "3mm",
+        marginBottom: "3mm",
+        borderBottom: "1px dashed #000",
+        textAlign: "center",
+      }}
+    >
+      {/* La marca va arriba: la etiqueta viaja colgada de la prenda y a
+          veces es lo único que el cliente conserva. Como en la tirilla,
+          el logo ya trae el nombre y no se repite al lado. */}
+      <LogoTinta ancho={26} />
+
+      {slogan ? (
+        <div style={{ fontSize: "7px", letterSpacing: "1.5px", textTransform: "uppercase" }}>
+          {slogan}
+        </div>
+      ) : null}
+
+      <div style={{ borderTop: "1px solid #000", margin: "1.5mm 0" }} />
+
+      <div style={{ fontSize: "11px", fontWeight: 700, lineHeight: 1.25 }}>
+        {v.product}
+      </div>
+      <div style={{ fontSize: "10px", letterSpacing: "1px" }}>
+        TALLA {v.size.toUpperCase()} · {v.color.toUpperCase()}
+      </div>
+
+      <div style={{ fontSize: "18px", fontWeight: 700, margin: "1.5mm 0 1mm" }}>
+        {pesos(v.sale_price)}
+      </div>
+
+      <CodigoBarras codigo={v.barcode} />
+
+      <div style={{ fontSize: "7px", letterSpacing: "0.5px", marginTop: "0.5mm" }}>
+        {v.sku}
+      </div>
+    </div>
+  );
+}
+
 export function ColaEtiquetas({
   pendientes,
   slogan,
@@ -60,6 +116,7 @@ export function ColaEtiquetas({
     () => new Set(pendientes.map((p) => p.id)),
   );
   const [marcando, setMarcando] = useState(false);
+  const [ampliada, setAmpliada] = useState(false);
 
   const seleccionadas = pendientes.filter((p) => elegidas.has(p.id));
 
@@ -156,49 +213,66 @@ export function ColaEtiquetas({
         ))}
       </ul>
 
+      {/* --- Vista previa ---
+          El bloque de abajo es el que imprime, y en pantalla está en
+          `display:none` siempre. Sin esto, la única forma de ver una
+          etiqueta antes de gastar papel era abrir el diálogo de
+          impresión del navegador, que en el celular ni siquiera
+          aparece. Va en papel blanco porque eso es lo que es. */}
+      {seleccionadas.length > 0 ? (
+        <section className="print:hidden">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-xs tracking-[0.16em] text-gris uppercase">
+              Vista previa · {ampliada ? "ampliada al doble" : "tamaño real"}
+            </h2>
+            <button
+              type="button"
+              onClick={() => setAmpliada((a) => !a)}
+              className="border border-humo px-4 py-2 text-xs tracking-[0.16em] text-gris uppercase transition-colors hover:border-gris hover:text-blanco"
+            >
+              {ampliada ? "Tamaño real" : "Ampliar"}
+            </button>
+          </div>
+
+          <div className="max-h-[70vh] overflow-auto border border-humo bg-humo p-4">
+            {/* El zoom vive aquí y nunca en `#etiquetas`: una
+                transformación sobre el bloque que imprime le cambia el
+                tamaño en el papel. */}
+            <div
+              style={{
+                transform: ampliada ? "scale(2)" : "none",
+                transformOrigin: "top left",
+                width: ampliada ? "116mm" : "58mm",
+              }}
+            >
+              <div
+                style={{
+                  width: "58mm",
+                  padding: "2mm",
+                  background: "#fff",
+                  color: "#000",
+                  fontFamily: "var(--fuente-mono), ui-monospace, monospace",
+                }}
+              >
+                {seleccionadas.map((v) => (
+                  <Etiqueta key={v.id} v={v} slogan={slogan} />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <p className="mt-3 text-xs leading-relaxed text-gris">
+            Así salen las {seleccionadas.length} seguidas por el rollo de 58 mm,
+            separadas por la línea de corte. Al imprimir hay que dejar los
+            márgenes en cero y desactivar encabezado y pie del navegador.
+          </p>
+        </section>
+      ) : null}
+
       {/* Lo único que sale por la impresora */}
       <div id="etiquetas" className="hidden print:block">
         {seleccionadas.map((v) => (
-          <div
-            key={v.id}
-            style={{
-              paddingBottom: "3mm",
-              marginBottom: "3mm",
-              borderBottom: "1px dashed #000",
-              textAlign: "center",
-            }}
-          >
-            {/* La marca va arriba: la etiqueta viaja colgada de la
-                prenda y a veces es lo único que el cliente conserva.
-                Como en la tirilla, el logo ya trae el nombre y no se
-                repite al lado. */}
-            <LogoTinta ancho={26} />
-
-            {slogan ? (
-              <div style={{ fontSize: "7px", letterSpacing: "1.5px", textTransform: "uppercase" }}>
-                {slogan}
-              </div>
-            ) : null}
-
-            <div style={{ borderTop: "1px solid #000", margin: "1.5mm 0" }} />
-
-            <div style={{ fontSize: "11px", fontWeight: 700, lineHeight: 1.25 }}>
-              {v.product}
-            </div>
-            <div style={{ fontSize: "10px", letterSpacing: "1px" }}>
-              TALLA {v.size.toUpperCase()} · {v.color.toUpperCase()}
-            </div>
-
-            <div style={{ fontSize: "18px", fontWeight: 700, margin: "1.5mm 0 1mm" }}>
-              {pesos(v.sale_price)}
-            </div>
-
-            <CodigoBarras codigo={v.barcode} />
-
-            <div style={{ fontSize: "7px", letterSpacing: "0.5px", marginTop: "0.5mm" }}>
-              {v.sku}
-            </div>
-          </div>
+          <Etiqueta key={v.id} v={v} slogan={slogan} />
         ))}
       </div>
     </div>
