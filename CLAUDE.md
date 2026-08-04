@@ -303,6 +303,14 @@ Cosas que se decidieron trabajando y que no se deducen leyendo el código:
 - **Lo que se imprime usa `<img>` y no `next/image`.** El optimizador envuelve
   la etiqueta en un `<span>` con carga diferida, y en una ventana de impresión
   eso sale como una tirilla sin logo.
+- **La vista previa y el bloque que imprime comparten el componente
+  `Etiqueta`.** Son dos árboles distintos en el DOM —uno visible, otro
+  `hidden print:block`— pero un solo diseño. Si cada uno tuviera su copia, la
+  previa dejaría de parecerse al papel en cuanto alguien tocara una sola.
+- **El zoom de la previa va en un envoltorio, nunca sobre `#etiquetas`.** Una
+  transformación sobre el bloque que imprime le cambia el tamaño en el papel:
+  las etiquetas saldrían al doble y el código de barras dejaría de medir lo que
+  el lector espera.
 - **En la portada el `h1` va `sr-only`.** El logo ya trae la palabra MÓNACO con
   su tipografía; repetirla al lado en Archivo era poner dos marcas distintas
   juntas. El título sigue ahí para buscadores y lectores de pantalla.
