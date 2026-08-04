@@ -131,10 +131,10 @@ Si la prenda llega con código de fábrica, se guarda tal cual y se marca `barco
 
 **Lector de código de barras.** No necesita librería. La pistola se comporta como un teclado: escribe los dígitos muy rápido y manda Enter. Se mantiene un input siempre enfocado en la pantalla del POS, se mide el tiempo entre pulsaciones (menos de ~30 ms entre teclas es la pistola, no un humano) y al recibir Enter se consulta. El input debe recuperar el foco tras cada acción, incluso después de cerrar un modal.
 
-**Tirilla de 58 mm.** Solo CSS:
+**Tirilla de 58 mm.** Casi todo CSS, menos la altura del papel:
 
 ```css
-@page { size: 58mm auto; margin: 0; }
+@page { size: 58mm 210mm; margin: 0; }   /* la altura la reescribe el JS */
 @media print {
   body * { visibility: hidden; }
   #tirilla, #tirilla * { visibility: visible; }
@@ -146,6 +146,26 @@ Si la prenda llega con código de fábrica, se guarda tal cual y se marca `barco
   }
 }
 ```
+
+**No escribas `size: 58mm auto`.** Es CSS **inválido**: la especificación
+admite `auto` a solas o una o dos medidas, pero no mezclar una medida con
+`auto`. El navegador descarta la regla entera y el papel cae al de por
+defecto, A4. Estuvo así desde el principio y no daba ningún error, solo dos
+síntomas que no parecían de CSS: la vista previa de impresión tardaba
+muchísimo —para pintar una tira de 58 mm el navegador rasteriza páginas de
+210 mm de ancho casi vacías, y en el celular se queda en "preparando vista
+previa"— y en el rollo se habrían ido 18 cm de papel en blanco por tirilla.
+Comprobado contra el CSSOM: `58mm auto` no deja rastro en la regla; `58mm
+100mm`, `A4` y `auto` sí.
+
+La altura exacta la escribe `lib/imprimir.ts` justo antes de imprimir,
+medida sobre el contenido. **Los botones que imprimen llaman a
+`imprimir58mm()`, no a `window.print()`.** Las etiquetas toman la altura de
+la más alta y cada una cae en su propia página, con `break-inside: avoid`
+para que ninguna salga partida. Hay que medir a la fuerza sacando el bloque
+fuera de la pantalla, porque vive en `display:none` y un elemento sin caja
+no tiene altura que consultar.
+
 En la impresora hay que dejar márgenes en cero y desactivar encabezado y pie del navegador, o salen la URL y la fecha impresas en la tirilla. El ancho útil real ronda los 48 mm: no metas tablas de más de dos columnas.
 
 **Tiempo real.** La página de detalle se suscribe por Realtime a las variantes que muestra y actualiza el stock sin recargar. Pero la garantía de verdad no está ahí: está en el `FOR UPDATE` dentro de `create_pos_sale`. Realtime es comodidad visual, no control de concurrencia.
