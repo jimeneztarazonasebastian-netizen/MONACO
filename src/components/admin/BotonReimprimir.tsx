@@ -5,6 +5,7 @@ import {
   type DatosTienda,
   type TirillaVenta,
 } from "@/components/pos/Tirilla";
+import { imprimir58mm } from "@/lib/imprimir";
 
 /**
  * Reimpresión de una tirilla vieja.
@@ -26,7 +27,7 @@ export function BotonReimprimir({
       <Tirilla venta={venta} tienda={tienda} />
       <button
         type="button"
-        onClick={() => window.print()}
+        onClick={() => imprimir58mm("#tirilla")}
         className="bisel-sm h-14 bg-rojo px-8 text-xs font-semibold tracking-[0.2em] text-blanco uppercase transition-opacity hover:opacity-90 print:hidden"
       >
         Reimprimir tirilla

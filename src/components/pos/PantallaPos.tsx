@@ -10,6 +10,7 @@ import {
 } from "@/components/pos/Tirilla";
 import { useBarcodeScanner } from "@/hooks/useBarcodeScanner";
 import { pesos } from "@/lib/formato";
+import { imprimir58mm } from "@/lib/imprimir";
 import {
   buscarPorCodigo,
   buscarPorNombre,
@@ -163,7 +164,7 @@ export function PantallaPos({
           <div className="flex flex-col gap-3">
             <button
               type="button"
-              onClick={() => window.print()}
+              onClick={() => imprimir58mm("#tirilla")}
               className="bisel-sm h-16 bg-rojo px-8 text-sm font-semibold tracking-[0.2em] text-blanco uppercase"
             >
               Imprimir tirilla

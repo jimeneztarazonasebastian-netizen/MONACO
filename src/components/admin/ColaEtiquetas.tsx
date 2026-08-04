@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { LogoTinta } from "@/components/ui/LogoMonaco";
 import { marcarEtiquetasImpresas } from "@/lib/actions/inventario";
 import { pesos } from "@/lib/formato";
+import { imprimir58mm } from "@/lib/imprimir";
 
 export type VariantePendiente = {
   id: string;
@@ -65,11 +66,16 @@ function Etiqueta({
 }) {
   return (
     <div
+      data-etiqueta
       style={{
         paddingBottom: "3mm",
         marginBottom: "3mm",
         borderBottom: "1px dashed #000",
         textAlign: "center",
+        // El papel mide lo que mide una etiqueta, así que cada una cae en
+        // su propia página. Sin esto, una etiqueta podría quedar partida
+        // entre dos y salir cortada por la mitad.
+        breakInside: "avoid",
       }}
     >
       {/* La marca va arriba: la etiqueta viaja colgada de la prenda y a
@@ -131,7 +137,7 @@ export function ColaEtiquetas({
 
   async function imprimirYMarcar() {
     if (seleccionadas.length === 0) return;
-    window.print();
+    imprimir58mm("#etiquetas", "[data-etiqueta]");
 
     // Se marca después de mandar a imprimir, y se pregunta: si la
     // impresora se traba, la prenda tiene que seguir en la cola.

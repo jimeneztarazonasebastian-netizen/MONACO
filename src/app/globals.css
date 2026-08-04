@@ -304,8 +304,19 @@ body {
    desactivar encabezado y pie del navegador, o salen impresos la URL y
    la fecha en medio de la tirilla.
    ------------------------------------------------------------------ */
+/* Ojo con la altura: `size: 58mm auto` es CSS **inválido** —la
+   especificación no admite mezclar una medida con `auto`— y el navegador
+   descartaba la regla entera, así que el papel caía al de por defecto
+   (A4). No daba ningún error: solo hacía que la vista previa tardara
+   muchísimo, porque para pintar una tira de 58 mm rasterizaba páginas de
+   210 mm de ancho casi vacías.
+
+   Esta regla deja fijo lo único que importa siempre, el ancho. La altura
+   exacta la escribe `lib/imprimir.ts` justo antes de imprimir, medida
+   sobre el contenido: 210 mm es solo el respaldo por si alguien imprime
+   con Ctrl+P en vez de con el botón. */
 @page {
-  size: 58mm auto;
+  size: 58mm 210mm;
   margin: 0;
 }
 
