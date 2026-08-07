@@ -122,10 +122,15 @@
 }
 
 /* En pantalla ancha las categorías caben junto al logo y la cabecera es
-   una sola fila; en el teléfono bajan a la suya y ocupa más. */
+   una sola fila; en el teléfono bajan a la suya y ocupa más.
+
+   Las dos medidas son la cabecera **sin encoger**, que es su estado en lo
+   alto de la página: al bajar se condensa, pero para entonces el hueco ya
+   no importa. Medirla estando encogida es lo que dejó 13 px de solape la
+   primera vez. */
 @media (min-width: 640px) {
   :root {
-    --alto-cabecera: 5.75rem;
+    --alto-cabecera: 6.75rem;
   }
 }
 
