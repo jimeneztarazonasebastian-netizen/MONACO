@@ -117,8 +117,15 @@
      entera por debajo y la banda se opaque sólo al bajar. Como no ocupa
      sitio en el flujo, el hueco lo reserva el `main` del layout con esta
      medida, y la portada lo recupera con un margen negativo. Cualquier
-     página nueva de la tienda lo hereda sin hacer nada. */
-  --alto-cabecera: 8.25rem;
+     página nueva de la tienda lo hereda sin hacer nada.
+
+     **Este valor es sólo el punto de partida.** `CabeceraTienda` mide la
+     barra de verdad y sobreescribe la variable en cuanto monta: escrita a
+     mano se desajustó dos veces, porque la cabecera mide distinto arriba
+     del todo que encogida por el scroll, y distinto en móvil que en
+     escritorio. Está aquí para que el hueco sea correcto antes de que
+     corra el script, y para que siga siéndolo sin JavaScript. */
+  --alto-cabecera: 9.25rem;
 }
 
 /* En pantalla ancha las categorías caben junto al logo y la cabecera es

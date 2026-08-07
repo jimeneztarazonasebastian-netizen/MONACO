@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { LogoMonaco } from "@/components/ui/LogoMonaco";
 import { unidadesCarritoWeb, usarCarrito } from "@/store/carrito";
@@ -31,6 +31,35 @@ export function CabeceraTienda({
     return () => window.removeEventListener("scroll", alBajar);
   }, []);
 
+  // La cabecera es `fixed`, así que no ocupa sitio: el hueco lo reserva
+  // el `main` del layout con `--alto-cabecera`. Ese valor estaba escrito
+  // a mano y se desajustó dos veces —una en cada dirección— porque la
+  // barra mide distinto arriba del todo que encogida por el scroll, y
+  // distinto en móvil que en escritorio. Aquí se mide sola.
+  //
+  // El CSS conserva un valor de partida para que antes de que corra esto,
+  // y sin JavaScript, el hueco ya sea aproximadamente correcto.
+  const referencia = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const nodo = referencia.current;
+    if (!nodo || typeof ResizeObserver === "undefined") return;
+
+    const medir = () => {
+      // Sin encoger: es el estado que tiene arriba del todo, que es
+      // justo cuando el hueco de abajo importa.
+      if (window.scrollY > 24) return;
+      document.documentElement.style.setProperty(
+        "--alto-cabecera",
+        `${nodo.getBoundingClientRect().height}px`,
+      );
+    };
+
+    medir();
+    const observador = new ResizeObserver(medir);
+    observador.observe(nodo);
+    return () => observador.disconnect();
+  }, []);
+
   const unidades = montado ? unidadesCarritoWeb(lineas) : 0;
 
   const enlaceCategoria =
@@ -38,6 +67,7 @@ export function CabeceraTienda({
 
   return (
     <header
+      ref={referencia}
       className={`fixed top-0 right-0 left-0 z-20 transition-colors duration-300 ${
         bajado
           ? "border-b border-humo bg-negro/95 backdrop-blur"
