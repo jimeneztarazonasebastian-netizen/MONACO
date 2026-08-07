@@ -62,9 +62,18 @@ La 0001 crea `pgcrypto` y `unaccent`. Sin `unaccent`, el trigger
 
 El linter sigue reportando tres cosas. Ninguna es un defecto:
 
-- **`rls_auto_enable` ejecutable por `anon`.** No es nuestra: es un event
-  trigger de la plataforma de Supabase que activa RLS en tablas nuevas. No se
-  toca.
+- **`rls_auto_enable` ejecutable por `anon`.** Falso positivo: la función
+  devuelve `event_trigger` y PostgreSQL se niega a invocarla directamente
+  (`ERROR: trigger functions can only be called as triggers`; por REST con la
+  clave anónima, HTTP 400). La **0013** le quita igualmente los permisos
+  sobrantes para que el aviso desaparezca.
+
+  Corrección de una nota anterior: aquí decía que la función era «de la
+  plataforma de Supabase» y que no se tocaba. No lo es. Los event triggers de
+  Supabase pertenecen a `supabase_admin`; `ensure_rls` pertenece a `postgres`,
+  no está en ninguna extensión y no aparecía en ninguna migración. Se creó a
+  mano contra la base. La 0013 la pone bajo control de versiones, porque una
+  base reconstruida desde este repositorio se quedaba sin esa red.
 - **Funciones `SECURITY DEFINER` ejecutables por `authenticated`.** Es toda la
   arquitectura: la lógica de negocio vive en funciones que el personal llama.
   El control de rol está dentro de cada una.
