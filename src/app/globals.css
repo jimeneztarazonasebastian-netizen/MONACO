@@ -112,6 +112,21 @@
 
 :root {
   color-scheme: dark;
+
+  /* La cabecera de la tienda es `fixed`, para que la portada se vea
+     entera por debajo y la banda se opaque sólo al bajar. Como no ocupa
+     sitio en el flujo, el hueco lo reserva el `main` del layout con esta
+     medida, y la portada lo recupera con un margen negativo. Cualquier
+     página nueva de la tienda lo hereda sin hacer nada. */
+  --alto-cabecera: 8.25rem;
+}
+
+/* En pantalla ancha las categorías caben junto al logo y la cabecera es
+   una sola fila; en el teléfono bajan a la suya y ocupa más. */
+@media (min-width: 640px) {
+  :root {
+    --alto-cabecera: 5.75rem;
+  }
 }
 
 body {
@@ -171,48 +186,102 @@ body {
   pointer-events: none;
 }
 
+/* Los tiempos son una secuencia, no tres animaciones sueltas: la marca
+   aparece, respira, una línea roja la subraya, y sólo entonces el telón
+   se va. La primera versión duraba 0.8s en total y el logo se iba al 55%
+   de los 0.55s suyos, así que en la práctica no se veía nada: el
+   visitante recibía un parpadeo, no una entrada. Todo cuelga de la misma
+   duración para que no se descuadren entre sí. */
 .telon::before {
   content: "";
   position: absolute;
   inset: -25% -50%;
   background-color: var(--color-negro);
   transform: skewX(-35deg);
-  animation: telon-sale 0.8s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+  animation: telon-sale 1.75s cubic-bezier(0.76, 0, 0.24, 1) forwards;
 }
 
 .telon-marca {
   position: absolute;
   inset: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  animation: telon-marca-sale 0.55s ease forwards;
+  gap: 1.25rem;
+  animation: telon-marca-sale 1.75s cubic-bezier(0.2, 0.6, 0.2, 1) forwards;
+}
+
+/* La línea se traza sola bajo el logo, con la inclinación de la marca.
+   Es el único rojo de toda la entrada. */
+.telon-linea {
+  width: min(220px, 46vw);
+  height: 2px;
+  background-color: var(--color-rojo);
+  transform: skewX(-35deg);
+  transform-origin: left center;
+  animation: telon-linea 1.75s cubic-bezier(0.76, 0, 0.24, 1) forwards;
 }
 
 @keyframes telon-sale {
-  from {
+  0%,
+  40% {
     transform: translateX(0) skewX(-35deg);
   }
-  to {
+  100% {
     transform: translateX(-175%) skewX(-35deg);
   }
 }
 
 @keyframes telon-marca-sale {
-  0%,
-  55% {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  16% {
     opacity: 1;
+    transform: none;
+  }
+  40% {
+    opacity: 1;
+    transform: none;
+  }
+  56% {
+    opacity: 0;
+    transform: translateY(-14px) scale(1.03);
   }
   100% {
     opacity: 0;
     visibility: hidden;
+    transform: translateY(-14px) scale(1.03);
+  }
+}
+
+@keyframes telon-linea {
+  0%,
+  10% {
+    transform: skewX(-35deg) scaleX(0);
+    opacity: 0;
+  }
+  16% {
+    opacity: 1;
+  }
+  38% {
+    transform: skewX(-35deg) scaleX(1);
+    opacity: 1;
+  }
+  56%,
+  100% {
+    transform: skewX(-35deg) scaleX(1);
+    opacity: 0;
   }
 }
 
 /* El contenido entra por debajo del telón, no después: si esperara, se
-   vería un salto en blanco entre que el telón sale y el texto aparece. */
+   vería un salto en blanco entre que el telón sale y el texto aparece.
+   El retardo lo pone justo cuando el telón empieza a correr. */
 .entra {
-  animation: entra-suave 0.7s 0.12s cubic-bezier(0.2, 0.6, 0.2, 1) both;
+  animation: entra-suave 0.95s 0.72s cubic-bezier(0.2, 0.6, 0.2, 1) both;
 }
 
 @keyframes entra-suave {
@@ -231,13 +300,35 @@ body {
 @media (prefers-reduced-motion: no-preference) {
   html[data-animar="si"] .revelar {
     opacity: 0;
-    transform: translateY(18px);
+    transform: translateY(22px);
     transition:
-      opacity 0.55s ease,
-      transform 0.55s cubic-bezier(0.2, 0.6, 0.2, 1);
+      opacity 0.7s ease,
+      transform 0.7s cubic-bezier(0.2, 0.6, 0.2, 1);
+    /* `--i` lo pone el componente con su posición en la rejilla: una
+       fila de tarjetas cae en cascada en vez de aparecer toda de golpe,
+       que es lo que hacía que el catálogo pareciera una diapositiva. Se
+       corta a 6 para que el último de una lista larga no espere medio
+       segundo. */
+    transition-delay: calc(min(var(--i, 0), 6) * 75ms);
   }
 
   html[data-animar="si"] .revelar.revelada {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Variante para bloques anchos: entran desde el lado del corte, no
+     desde abajo, para que el movimiento siga el ángulo de la marca. */
+  html[data-animar="si"] .revelar-lado {
+    opacity: 0;
+    transform: translateX(-28px);
+    transition:
+      opacity 0.75s ease,
+      transform 0.75s cubic-bezier(0.2, 0.6, 0.2, 1);
+    transition-delay: calc(min(var(--i, 0), 6) * 75ms);
+  }
+
+  html[data-animar="si"] .revelar-lado.revelada {
     opacity: 1;
     transform: none;
   }
@@ -295,6 +386,156 @@ body {
 .cursor-anillo-activo {
   width: 48px;
   height: 48px;
+}
+
+/* ------------------------------------------------------------------
+   Composición de la tienda pública.
+
+   La portada era una pila de secciones centradas, una debajo de otra y
+   todas con el mismo ritmo: se leía como un pase de diapositivas. Estas
+   piezas existen para romper esa simetría — tipografía que ocupa, cortes
+   diagonales en vez de bordes rectos, y foto de prenda como fondo — sin
+   inventar un lenguaje nuevo: el ángulo sigue siendo 35° y el rojo
+   sigue siendo uno solo.
+   ------------------------------------------------------------------ */
+
+/* Titular que escala con la ventana en vez de saltar por puntos de
+   corte. El tracking se cierra a medida que crece: a 90px, 0.14em
+   separa tanto que la palabra deja de leerse como una unidad. */
+.titulo-gigante {
+  font-family: var(--fuente-display), ui-sans-serif, system-ui, sans-serif;
+  font-variation-settings: "wdth" 120;
+  text-transform: uppercase;
+  font-size: clamp(2.4rem, 7.5vw, 5.5rem);
+  line-height: 0.94;
+  letter-spacing: clamp(0.01em, 0.4vw, 0.05em);
+}
+
+.titulo-seccion {
+  font-family: var(--fuente-display), ui-sans-serif, system-ui, sans-serif;
+  font-variation-settings: "wdth" 120;
+  text-transform: uppercase;
+  font-size: clamp(1.35rem, 3vw, 2.1rem);
+  line-height: 1.05;
+  letter-spacing: 0.06em;
+}
+
+/* Velo sobre la foto: sin esto el texto blanco cae encima de prendas
+   claras y deja de leerse. Va en dos direcciones porque el titular se
+   apoya abajo a la izquierda. */
+@utility velo-foto {
+  background-image:
+    linear-gradient(to top, var(--color-negro) 4%, transparent 62%),
+    linear-gradient(to right, var(--color-negro) 2%, rgb(10 10 10 / 0.35) 48%, transparent 82%);
+}
+
+/* Corte diagonal entre secciones: el borde recto de 1px se cambia por
+   el mismo ángulo del monograma. Es decorativo y no debe capturar el
+   ratón ni leerse en voz alta. */
+@utility corte-diagonal {
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--color-humo) 12%,
+      var(--color-humo) 88%,
+      transparent 100%
+    );
+    pointer-events: none;
+  }
+}
+
+/* Trama de líneas a 35°, el fondo de la marca. La opacidad se pasa por
+   variable para poder subirla en la portada y bajarla donde estorbe. */
+@utility trama-35 {
+  background-image: repeating-linear-gradient(
+    125deg,
+    var(--color-blanco) 0 1px,
+    transparent 1px 26px
+  );
+  opacity: var(--trama, 0.07);
+}
+
+/* Cinta de texto en movimiento continuo. Da sensación de tienda viva
+   entre dos bloques quietos; se detiene sola con reduced-motion por el
+   bloque del final del archivo. */
+.marquesina {
+  display: flex;
+  width: max-content;
+  animation: marquesina-corre 38s linear infinite;
+}
+
+.marquesina-grupo {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+@keyframes marquesina-corre {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* -50% y no -100%: el contenido va duplicado, así que al llegar a la
+       mitad la cinta está exactamente igual que al empezar y el salto no
+       se ve. */
+    transform: translateX(-50%);
+  }
+}
+
+/* Señal de que hay más abajo. Sin esto una portada a pantalla completa
+   parece el final de la página. */
+.senal-scroll span {
+  display: block;
+  width: 1px;
+  height: 44px;
+  background: linear-gradient(to bottom, var(--color-gris), transparent);
+  animation: senal-baja 2.1s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+@keyframes senal-baja {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+/* Subrayado que se traza al pasar por encima, con la inclinación de la
+   marca. Se usa en los enlaces de texto grandes. */
+.enlace-traza {
+  position: relative;
+}
+
+.enlace-traza::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 2px;
+  background-color: var(--color-rojo);
+  transform: skewX(-35deg) scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.4s cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+
+.enlace-traza:hover::after,
+.enlace-traza:focus-visible::after {
+  transform: skewX(-35deg) scaleX(1);
 }
 
 /* ------------------------------------------------------------------

@@ -3,9 +3,22 @@
 import { useState } from "react";
 
 import { fechaHora, pesos } from "@/lib/formato";
-import { anularPedido, confirmarPedido } from "@/lib/actions/pedidos";
-import { normalizarNumero } from "@/lib/whatsapp";
+import { anularPedido, confirmarPedido, guardarGuia } from "@/lib/actions/pedidos";
+import { enlaceACliente, mensajeGuia, normalizarNumero } from "@/lib/whatsapp";
 import type { MetodoPago } from "@/types/database";
+
+/**
+ * Las que reparten en Colombia. Es una lista de atajos, no un enum: el
+ * campo admite cualquier texto porque mañana pueden usar otra.
+ */
+const TRANSPORTADORAS = [
+  "Interrapidísimo",
+  "Servientrega",
+  "Coordinadora",
+  "Envía",
+  "TCC",
+  "Domicilio propio",
+];
 
 const METODOS: { valor: MetodoPago; etiqueta: string }[] = [
   { valor: "efectivo", etiqueta: "Efectivo" },
@@ -22,6 +35,8 @@ export type Pedido = {
   total: number;
   created_at: string;
   notes: string | null;
+  shipping_carrier: string | null;
+  tracking_number: string | null;
   customers: {
     full_name: string;
     phone: string | null;
@@ -41,9 +56,42 @@ export function TarjetaPedido({ pedido }: { pedido: Pedido }) {
   const [metodo, setMetodo] = useState<MetodoPago>("nequi");
   const [trabajando, setTrabajando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [transportadora, setTransportadora] = useState(
+    pedido.shipping_carrier ?? "",
+  );
+  const [guia, setGuia] = useState(pedido.tracking_number ?? "");
+  const [guardada, setGuardada] = useState(false);
 
   const pendiente = pedido.status === "pendiente";
   const telefono = normalizarNumero(pedido.customers?.phone);
+
+  // El despacho sólo tiene sentido cuando la venta ya se cerró: un pedido
+  // pendiente todavía no se ha cobrado y uno anulado no sale a ningún
+  // lado.
+  const despachable = pedido.status === "pagada";
+  const hayGuia = transportadora.trim() !== "" && guia.trim() !== "";
+
+  const avisoWhatsapp =
+    telefono && hayGuia
+      ? enlaceACliente(
+          telefono,
+          mensajeGuia(
+            pedido.number,
+            pedido.customers?.full_name ?? "",
+            transportadora,
+            guia,
+          ),
+        )
+      : null;
+
+  async function anotarGuia() {
+    setTrabajando(true);
+    setError(null);
+    const r = await guardarGuia(pedido.id, transportadora, guia);
+    setTrabajando(false);
+    if (!r.ok) setError(r.error ?? "No se pudo guardar la guía.");
+    else setGuardada(true);
+  }
 
   async function confirmar() {
     setTrabajando(true);
@@ -171,6 +219,79 @@ export function TarjetaPedido({ pedido }: { pedido: Pedido }) {
           {pedido.status === "pagada" ? "Confirmado" : "Anulado"}
         </p>
       )}
+
+      {/* --- Despacho ---
+          Aparece sólo cuando la venta ya está cobrada. La guía se anota
+          aquí y se le manda al cliente con un solo toque, en vez de
+          quedarse escrita únicamente en la conversación de WhatsApp. */}
+      {despachable ? (
+        <div className="mt-5 border-t border-humo pt-4">
+          <p className="mb-3 text-xs tracking-[0.16em] text-gris uppercase">
+            Envío
+          </p>
+
+          <div className="flex flex-col gap-3">
+            <input
+              list={`transportadoras-${pedido.id}`}
+              value={transportadora}
+              onChange={(e) => {
+                setTransportadora(e.target.value);
+                setGuardada(false);
+              }}
+              placeholder="Transportadora"
+              aria-label={`Transportadora del pedido ${pedido.number}`}
+              className="h-12 border border-humo bg-negro px-3 text-sm text-blanco placeholder:text-gris focus:border-gris focus:outline-none"
+            />
+            <datalist id={`transportadoras-${pedido.id}`}>
+              {TRANSPORTADORAS.map((t) => (
+                <option key={t} value={t} />
+              ))}
+            </datalist>
+
+            <input
+              value={guia}
+              onChange={(e) => {
+                setGuia(e.target.value);
+                setGuardada(false);
+              }}
+              placeholder="Número de guía"
+              aria-label={`Número de guía del pedido ${pedido.number}`}
+              className="h-12 border border-humo bg-negro px-3 font-mono text-sm text-blanco placeholder:font-sans placeholder:text-gris focus:border-gris focus:outline-none"
+            />
+
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={anotarGuia}
+                disabled={trabajando}
+                className="h-12 border border-humo px-5 text-xs tracking-[0.16em] text-gris uppercase transition-colors hover:border-gris hover:text-blanco disabled:opacity-40"
+              >
+                {trabajando ? "…" : guardada ? "Guardada" : "Guardar guía"}
+              </button>
+
+              {avisoWhatsapp ? (
+                // Ancla y no `window.open`: los bloqueadores se comen lo
+                // segundo, igual que en el checkout del catálogo.
+                <a
+                  href={avisoWhatsapp}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bisel-sm inline-flex h-12 items-center bg-rojo px-5 text-xs font-semibold tracking-[0.16em] text-blanco uppercase transition-opacity hover:opacity-90"
+                >
+                  Avisar por WhatsApp
+                </a>
+              ) : null}
+            </div>
+
+            {!telefono && hayGuia ? (
+              <p className="text-xs text-gris">
+                Este pedido no tiene teléfono, así que no se le puede avisar
+                desde aquí.
+              </p>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
     </article>
   );
 }

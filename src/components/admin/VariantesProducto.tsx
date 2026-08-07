@@ -193,6 +193,12 @@ function FilaVariante({
                   <option value="entrada">Entrada de mercancía</option>
                   <option value="ajuste">Ajuste por conteo</option>
                   <option value="merma">Merma o daño</option>
+                  {/* `salida` ya existía en el kardex pero el desplegable
+                      nunca la ofrecía, así que una prenda que se iba a una
+                      foto de Instagram o de vuelta al proveedor sólo se
+                      podía registrar como merma — y merma significa que se
+                      dañó, que es otra cosa y ensucia el reporte. */}
+                  <option value="salida">Salida (muestra, garantía, uso interno)</option>
                   <option value="devolucion">Devolución de cliente</option>
                 </Seleccion>
                 <Campo

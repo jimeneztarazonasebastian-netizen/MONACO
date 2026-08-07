@@ -31,7 +31,10 @@ export function RevelarAlEntrar() {
     );
 
     const observarPendientes = () => {
-      for (const nodo of document.querySelectorAll(".revelar:not(.revelada)")) {
+      const pendientes = document.querySelectorAll(
+        ".revelar:not(.revelada), .revelar-lado:not(.revelada)",
+      );
+      for (const nodo of pendientes) {
         observador.observe(nodo);
       }
     };

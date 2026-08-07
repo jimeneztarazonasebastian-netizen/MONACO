@@ -19,7 +19,17 @@ export type PrendaCatalogo = {
   colors: string[] | null;
 };
 
-export function TarjetaPrenda({ prenda }: { prenda: PrendaCatalogo }) {
+export function TarjetaPrenda({
+  prenda,
+  indice = 0,
+  grande = false,
+}: {
+  prenda: PrendaCatalogo;
+  /** Posición en la rejilla. Escalona la aparición al hacer scroll. */
+  indice?: number;
+  /** Pieza de apertura de la vitrina: ocupa el doble y respira más. */
+  grande?: boolean;
+}) {
   const foto = primeraImagen(prenda.images);
   const stock = prenda.total_stock ?? 0;
   const agotada = stock <= 0;
@@ -30,15 +40,30 @@ export function TarjetaPrenda({ prenda }: { prenda: PrendaCatalogo }) {
   return (
     <Link
       href={`/catalogo/${prenda.slug}`}
-      className="bisel revelar group block h-full border border-humo bg-carbon transition-colors hover:border-gris focus-visible:border-gris"
+      style={{ "--i": indice } as React.CSSProperties}
+      className={`bisel revelar group h-full border border-humo bg-carbon transition-colors hover:border-gris focus-visible:border-gris ${
+        grande ? "flex flex-col sm:col-span-2 sm:row-span-2" : "block"
+      }`}
     >
-      <div className="barrido group-hover:barrido-activo relative aspect-4/5 overflow-hidden">
+      {/* En la pieza grande la foto estira hasta llenar la celda de 2×2 en
+          vez de tomar una proporción fija. Con `aspect` fijo la caja salía
+          apaisada, y una foto de prenda —que es vertical— recortada a
+          apaisado deja fuera la prenda y enseña el fondo. */}
+      <div
+        className={`barrido group-hover:barrido-activo relative overflow-hidden ${
+          grande ? "aspect-4/5 sm:aspect-auto sm:min-h-0 sm:flex-1" : "aspect-4/5"
+        }`}
+      >
         {foto ? (
           <Image
             src={foto}
             alt={prenda.name ?? ""}
             fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            sizes={
+              grande
+                ? "(max-width: 640px) 100vw, 50vw"
+                : "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            }
             className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
           />
         ) : (
@@ -73,12 +98,16 @@ export function TarjetaPrenda({ prenda }: { prenda: PrendaCatalogo }) {
         ) : null}
       </div>
 
-      <div className="p-4">
-        <h3 className="fuente-display-compacta mb-2 truncate text-xs text-blanco">
+      <div className={grande ? "p-5 sm:p-6" : "p-4"}>
+        <h3
+          className={`fuente-display-compacta mb-2 truncate text-blanco ${
+            grande ? "text-sm sm:text-base" : "text-xs"
+          }`}
+        >
           {prenda.name}
         </h3>
 
-        <p className="font-mono text-base text-blanco">
+        <p className={`font-mono text-blanco ${grande ? "text-lg sm:text-xl" : "text-base"}`}>
           {prenda.price_varies ? (
             <span className="text-xs tracking-[0.1em] text-gris uppercase">
               desde{" "}

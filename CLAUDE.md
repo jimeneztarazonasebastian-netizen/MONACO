@@ -262,7 +262,8 @@ márgenes y lo más vendido · configuración de la tienda.
 `0003` cierra permisos que quedaron abiertos · `0004` bucket de imágenes ·
 `0005` correcciones del POS · `0006` etiquetas de prendas archivadas ·
 `0007` reportes · `0008` anulaciones, devoluciones y caja · `0009` anular con
-devoluciones previas · `0010` eslogan · `0011` ocultar costos al público.
+devoluciones previas · `0010` eslogan · `0011` ocultar costos al público ·
+`0012` guías de envío en los pedidos web.
 
 ---
 
@@ -371,6 +372,39 @@ Cosas que se decidieron trabajando y que no se deducen leyendo el código:
   del catálogo reemplazan la rejilla entera sin recargar; si sólo se
   observara una vez, las tarjetas que llegan después nacerían escondidas y
   el filtro parecería no devolver resultados.
+- **La entrada es una secuencia, no tres animaciones sueltas.** La primera
+  versión duraba 0,8 s en total y el logo se iba al 55 % de sus 0,55 s: en
+  la práctica no se veía nada, era un parpadeo. Ahora la marca aparece,
+  respira, una línea roja la subraya y sólo entonces corre el telón —todo
+  a 1,75 s, la misma duración para las tres piezas para que no se
+  descuadren— y el contenido entra a los 0,72 s, por debajo del telón.
+- **La cabecera de la tienda es `fixed`, no `sticky`.** Arranca
+  transparente para que la portada se vea entera y se opaca al bajar. Como
+  no ocupa sitio en el flujo, el hueco lo reserva el `main` del layout con
+  `--alto-cabecera`, y la portada lo recupera con un margen negativo.
+  **Esa variable tiene dos valores** porque en el teléfono las categorías
+  bajan a su propia fila: 8,25 rem hasta 640 px y 5,75 rem a partir de
+  ahí. Si se cambia el contenido de la cabecera hay que volver a medirla,
+  o el contenido de las demás páginas queda por debajo.
+- **En el teléfono las categorías se desplazan de lado, no se envuelven.**
+  Envolviéndose, la cabecera fija medía 190 px en un móvil de 812: un
+  cuarto de la pantalla en una tienda cuyo tráfico llega de Instagram.
+- **La portada se apoya en la foto de una prenda real**, la destacada. Una
+  foto de ropa vende más que cualquier fondo abstracto, y el dueño elige
+  cuál marcando `is_featured`. Esa misma prenda **no vuelve a salir de
+  cabeza en la vitrina**: verla dos veces en la misma pantalla hace pensar
+  que el catálogo tiene una sola prenda.
+- **La pieza grande de la vitrina estira, no lleva proporción fija.** Con
+  `aspect` fijo la caja de 2×2 salía apaisada, y una foto de prenda —que
+  es vertical— recortada a apaisado deja la prenda fuera y enseña el
+  fondo.
+- **Las guías de envío son dos columnas en `sales`, no una tabla.** Hoy hay
+  como mucho un envío por venta. Si algún día se parte un pedido en dos
+  despachos, eso se mueve a su propia tabla.
+- **`salida` existía en el kardex pero el desplegable no la ofrecía.** Una
+  prenda que se iba a una foto de Instagram o de vuelta al proveedor sólo
+  se podía registrar como **merma**, que significa que se dañó y ensucia
+  el reporte.
 
 **Trampas del entorno (Windows)**
 

@@ -70,6 +70,41 @@ export function mensajePedido(
     .join("\n\n");
 }
 
+/**
+ * Aviso de despacho que la tienda le manda al cliente.
+ *
+ * Va aquí y no en la tarjeta de pedido por la misma razón que el resto de
+ * este archivo: el día que se pase a la API oficial de Meta, el texto de
+ * los mensajes ya está en un solo sitio.
+ */
+export function mensajeGuia(
+  numeroPedido: string,
+  nombreCliente: string,
+  transportadora: string,
+  guia: string,
+): string {
+  const saludo = nombreCliente.trim().split(/\s+/)[0] || "Hola";
+
+  return [
+    `¡${saludo}! Tu pedido ${numeroPedido} ya salió.`,
+    [`Transportadora: ${transportadora}`, `Guía: ${guia}`].join("\n"),
+    "Con ese número puedes rastrearlo en la página de la transportadora. Cualquier cosa nos escribes por aquí.",
+  ].join("\n\n");
+}
+
+/**
+ * Enlace para escribirle a un cliente con el mensaje ya redactado.
+ *
+ * `enlaceWhatsapp` apunta al número de la tienda porque lo usa el
+ * visitante del catálogo. Este es el sentido contrario: lo usa la tienda
+ * para escribirle a un cliente.
+ */
+export function enlaceACliente(numeroCliente: string, mensaje: string): string {
+  const destino = normalizarNumero(numeroCliente);
+  if (!destino) return "";
+  return `https://wa.me/${destino}?text=${encodeURIComponent(mensaje)}`;
+}
+
 export function enlaceWhatsapp(numeroTienda: string, mensaje: string): string {
   const destino = normalizarNumero(numeroTienda);
   return `https://wa.me/${destino}?text=${encodeURIComponent(mensaje)}`;

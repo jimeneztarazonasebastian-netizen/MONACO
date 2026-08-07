@@ -8,7 +8,7 @@ import { plural } from "@/lib/texto";
 export const metadata: Metadata = { title: "Pedidos web" };
 
 const SELECCION =
-  "id, number, status, total, created_at, notes, customers(full_name, phone, address), sale_items(id, product_name, size, color, quantity, unit_price)";
+  "id, number, status, total, created_at, notes, shipping_carrier, tracking_number, customers(full_name, phone, address), sale_items(id, product_name, size, color, quantity, unit_price)";
 
 export default async function PaginaPedidos() {
   await exigirAdmin();

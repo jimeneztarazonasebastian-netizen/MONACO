@@ -134,6 +134,38 @@ export async function confirmarPedido(
   return { ok: true };
 }
 
+/**
+ * Anota la transportadora y el número de guía de un pedido despachado.
+ *
+ * No cambia el estado ni toca inventario: es un dato de seguimiento. Sin
+ * esto la guía sólo existe en la conversación de WhatsApp, y cuando el
+ * cliente pregunta si su pedido ya salió hay que ir a buscar el chat.
+ *
+ * Se guarda vacío como `null` y no como cadena en blanco, para que la
+ * tarjeta pueda distinguir "sin despachar" de "despachado".
+ */
+export async function guardarGuia(
+  ventaId: string,
+  transportadora: string,
+  guia: string,
+): Promise<{ ok: boolean; error?: string }> {
+  await exigirAdmin();
+  const supabase = await crearClienteServidor();
+
+  const { error } = await supabase
+    .from("sales")
+    .update({
+      shipping_carrier: transportadora.trim() || null,
+      tracking_number: guia.trim() || null,
+    })
+    .eq("id", ventaId);
+
+  if (error) return { ok: false, error: "No se pudo guardar la guía." };
+
+  revalidatePath("/pedidos");
+  return { ok: true };
+}
+
 /** Cancela un pedido web que no se concretó. No toca inventario. */
 export async function anularPedido(ventaId: string) {
   await exigirAdmin();

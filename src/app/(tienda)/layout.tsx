@@ -63,7 +63,8 @@ export default async function LayoutTienda({
           moverse por la tienda no lo repite. */}
       <div className="telon" aria-hidden="true">
         <span className="telon-marca">
-          <LogoMonaco alto={160} className="h-auto w-36" />
+          <LogoMonaco alto={200} className="h-auto w-44 sm:w-56" />
+          <span className="telon-linea" />
         </span>
       </div>
 
@@ -72,7 +73,12 @@ export default async function LayoutTienda({
 
       <CabeceraTienda categorias={categorias} />
 
-      <main className="entra flex-1">{children}</main>
+      <main
+        className="entra flex-1"
+        style={{ paddingTop: "var(--alto-cabecera)" }}
+      >
+        {children}
+      </main>
 
       <footer className="mt-20 border-t border-humo px-5 py-10">
         <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-8 text-xs text-gris">

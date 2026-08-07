@@ -610,9 +610,11 @@ export type Database = {
           notes: string | null
           number: string
           paid_at: string | null
+          shipping_carrier: string | null
           status: Database["public"]["Enums"]["sale_status"]
           subtotal: number
           total: number
+          tracking_number: string | null
           voided_at: string | null
         }
         Insert: {
@@ -631,9 +633,11 @@ export type Database = {
           notes?: string | null
           number?: string
           paid_at?: string | null
+          shipping_carrier?: string | null
           status?: Database["public"]["Enums"]["sale_status"]
           subtotal?: number
           total?: number
+          tracking_number?: string | null
           voided_at?: string | null
         }
         Update: {
@@ -652,9 +656,11 @@ export type Database = {
           notes?: string | null
           number?: string
           paid_at?: string | null
+          shipping_carrier?: string | null
           status?: Database["public"]["Enums"]["sale_status"]
           subtotal?: number
           total?: number
+          tracking_number?: string | null
           voided_at?: string | null
         }
         Relationships: [
