@@ -57,7 +57,18 @@ export function CabeceraTienda({
     medir();
     const observador = new ResizeObserver(medir);
     observador.observe(nodo);
-    return () => observador.disconnect();
+
+    // Además del observador, por el giro del teléfono: al pasar a
+    // horizontal las categorías dejan de ir en su propia fila y la barra
+    // cambia de alto. La medición se aplaza un cuadro para que el
+    // navegador ya haya recolocado.
+    const alGirar = () => requestAnimationFrame(medir);
+    window.addEventListener("resize", alGirar);
+
+    return () => {
+      observador.disconnect();
+      window.removeEventListener("resize", alGirar);
+    };
   }, []);
 
   const unidades = montado ? unidadesCarritoWeb(lineas) : 0;
